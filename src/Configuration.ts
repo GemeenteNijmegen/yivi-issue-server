@@ -15,7 +15,7 @@ export const configurations: { [key: string]: Configuration } = {
     branchName: 'development',
     yiviVersionNumber: '0.0.0',
     codeStarConnectionArn: Statics.codeStarConnectionArn,
-    deployFromEnvironment: Statics.sandboxEnvironment,
+    deployFromEnvironment: Statics.deploymentEnvironment,
     deployToEnvironment: Statics.sandboxEnvironment,
     sessionEndpointAllowList: [
       '', // TODO arn of issue lambda in Yivi issue app

@@ -15,7 +15,7 @@ export class PipelineStack extends core.Stack {
   constructor(scope: Construct, id: string, props: PipelineStackProps) {
     super(scope, id, props);
     core.Tags.of(this).add('cdkManaged', 'yes');
-    core.Tags.of(this).add('project', 'auth');
+    core.Tags.of(this).add('project', Statics.projectName);
 
     //Repo for the main cdk project
     const repository = cdkpipelines.CodePipelineSource.connection(Statics.gitRepository, props.configuration.branchName, {

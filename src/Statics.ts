@@ -20,5 +20,10 @@ export class Statics {
     region: 'eu-west-1',
   };
 
+  static readonly deploymentEnvironment = {
+    account: '418648875085',
+    region: 'eu-west-1',
+  };
+
 
 }
