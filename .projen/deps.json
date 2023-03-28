@@ -85,8 +85,20 @@
       "type": "build"
     },
     {
+      "name": "@aws-cdk/aws-apigatewayv2-alpha",
+      "type": "runtime"
+    },
+    {
+      "name": "@aws-cdk/aws-apigatewayv2-integrations-alpha",
+      "type": "runtime"
+    },
+    {
       "name": "aws-cdk-lib",
       "version": "^2.1.0",
+      "type": "runtime"
+    },
+    {
+      "name": "cdk-remote-stack",
       "type": "runtime"
     },
     {

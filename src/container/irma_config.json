@@ -1,0 +1,35 @@
+{
+  "schemes_path": "/usr/local/share/irma/irma_configuration",
+  "disable_schemes_update": false,
+  "schemes_update": 60,
+  "url": "IRMA_GW_URL",
+  "DisableTLS": true,
+  "EnableSSE": false,
+  "verbose": 8,
+  "quiet": false,
+  "log_json": false,
+  "production": true,
+  "email": "b.withaar@nijmegen.nl",
+  "no_email": "false",
+  "disclose_perms": [
+    "*"
+  ],
+  "sign_perms": [
+    "*"
+  ],
+  "issue_perms": [
+    "*"
+  ],
+  "no_auth": false,
+  "port": 8080,
+  "requestors": {
+    "irmaapp": {
+      "auth_method": "token",
+      "key": "IRMA_TOKEN"
+    }
+  },
+  "max_request_age": 300,
+  "store_type": "redis",
+  "redis_addr": "master.irma-issue-multi-az.j1ru1n.euw1.cache.amazonaws.com:6379",
+  "redis_pw": "supersecretpassword"
+}
