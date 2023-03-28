@@ -3,6 +3,7 @@ import * as cdkpipelines from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
 import { ApiStage } from './ApiStage';
 import { Configuration } from './Configuration';
+import { DeploymentStage } from './DeploymentStage';
 import { Statics } from './Statics';
 
 export interface PipelineStackProps extends core.StackProps {
@@ -37,6 +38,10 @@ export class PipelineStack extends core.Stack {
         ],
       }),
     });
+
+    pipeline.addStage(new DeploymentStage(this, 'yivi-issue-server-deployment', {
+
+    }));
 
     if (!props.emptyPipeline) {
       pipeline.addStage(new ApiStage(this, 'yivi-issue-server', {
