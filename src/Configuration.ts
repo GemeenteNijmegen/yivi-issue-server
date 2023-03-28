@@ -18,7 +18,7 @@ export const configurations: { [key: string]: Configuration } = {
     deployFromEnvironment: Statics.sandboxEnvironment,
     deployToEnvironment: Statics.sandboxEnvironment,
     sessionEndpointAllowList: [
-      '' // TODO arn of issue lambda in Yivi issue app
+      '', // TODO arn of issue lambda in Yivi issue app
     ],
   },
 };

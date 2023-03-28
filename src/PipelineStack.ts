@@ -38,7 +38,7 @@ export class PipelineStack extends core.Stack {
       }),
     });
 
-    if(props.emptyPipeline){
+    if (props.emptyPipeline) {
       pipeline.addStage(new ApiStage(this, 'yivi-issue-server', {
         ...props.configuration,
       }));

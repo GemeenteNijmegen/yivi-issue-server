@@ -31,12 +31,12 @@ export class ApiStack extends Stack {
           resources: ['execute-api:/session'],
           conditions: {
             // TODO check which conditions we can apply
-          }
+          },
         }),
-      ]
-    })
+      ],
+    });
 
-    // Use apigateway (v1/RestApi) for WAF integration, and resource policies 
+    // Use apigateway (v1/RestApi) for WAF integration, and resource policies
     const api = new apigateway.RestApi(this, 'yivi-issue-server', {
       description: 'Yivi issue server',
       policy: apiResourcePolicy,
@@ -51,7 +51,7 @@ export class ApiStack extends Stack {
   /**
    * Add the /irma path to the API gateway
    * Allow all ANY http request
-   * @param api 
+   * @param api
    */
   setupIrmaEndpoint(api: apigateway.RestApi) {
 
@@ -61,16 +61,16 @@ export class ApiStack extends Stack {
       options: {
         connectionType: apigateway.ConnectionType.VPC_LINK,
         requestParameters: {
-          "integration.request.path.proxy": "method.request.path.proxy"
+          'integration.request.path.proxy': 'method.request.path.proxy',
         },
-      }
+      },
     });
 
     const methodConfiguration = {
       authorizationType: apigateway.AuthorizationType.NONE,
-    }
+    };
 
-    const irma = api.root.addResource('/irma/{proxy+}')
+    const irma = api.root.addResource('/irma/{proxy+}');
     irma.addMethod('ANY', integration, methodConfiguration);
   }
 
@@ -81,7 +81,7 @@ export class ApiStack extends Stack {
    * - /session/{token}/result GET
    * - /session/{token}/status GET
    * - /session/{token}/statusevents GET
-   * @param api 
+   * @param api
    */
   setupSessionEndpoint(api: apigateway.RestApi) {
     const session = api.root.addResource('/session');
