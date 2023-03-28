@@ -7,6 +7,7 @@ import { Statics } from './Statics';
 
 export interface PipelineStackProps extends core.StackProps {
   configuration: Configuration;
+  emptyPipeline: boolean;
 }
 
 export class PipelineStack extends core.Stack {
@@ -37,9 +38,11 @@ export class PipelineStack extends core.Stack {
       }),
     });
 
-    pipeline.addStage(new ApiStage(this, 'yivi-issue-server', {
-      ...props.configuration,
-    }));
+    if(props.emptyPipeline){
+      pipeline.addStage(new ApiStage(this, 'yivi-issue-server', {
+        ...props.configuration,
+      }));
+    }
 
     // TODO figure out an request to check if the container is actually live and reachable
     // if (props.runValidationChecks) {

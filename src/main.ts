@@ -10,6 +10,7 @@ const app = new App();
 new PipelineStack(app, `yivi-issue-server-${configuration.branchName}`, {
   env: configuration.deployFromEnvironment,
   configuration: configuration,
+  emptyPipeline: true, // Do not deploy any stages at first
 });
 
 app.synth();
