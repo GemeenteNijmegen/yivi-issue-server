@@ -40,7 +40,7 @@ export class PipelineStack extends core.Stack {
     });
 
     pipeline.addStage(new DeploymentStage(this, 'yivi-issue-server-deployment', {
-
+      configuration: props.configuration,
     }));
 
     if (!props.emptyPipeline) {
