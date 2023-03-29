@@ -26,7 +26,7 @@ export class PipelineStack extends core.Stack {
 
     //Repo for the main cdk project
     const repository = cdkpipelines.CodePipelineSource.connection(Statics.gitRepository, props.configuration.branchName, {
-      connectionArn: props.configuration.codeStarConnectionArn,
+      connectionArn: Statics.codeStarconnectionArnGnBuildNewLz,
     });
     // const repository = new codecommit.Repository(this, `${Statics.projectName}-repository`, {
     //   repositoryName: `${Statics.projectName}`,
