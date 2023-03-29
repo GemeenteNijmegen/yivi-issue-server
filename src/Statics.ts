@@ -16,13 +16,13 @@ export class Statics {
   // Environments related statics
   static readonly codeStarConnectionArn = 'arn:aws:codestar-connections:eu-west-1:418648875085:connection/4f647929-c982-4f30-94f4-24ff7dbf9766';
   static readonly sandboxEnvironment = {
-    account: '698929623502',
-    region: 'eu-west-1',
+    account: '095798249317',
+    region: 'eu-central-1',
   };
 
   static readonly deploymentEnvironment = {
-    account: '418648875085',
-    region: 'eu-west-1',
+    account: '836443378780',
+    region: 'eu-central-1',
   };
 
 
