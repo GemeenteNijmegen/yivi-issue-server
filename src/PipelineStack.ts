@@ -1,5 +1,5 @@
 import * as core from 'aws-cdk-lib';
-import { aws_codecommit as codecommit, Aspects } from 'aws-cdk-lib';
+import { Aspects } from 'aws-cdk-lib';
 import * as cdkpipelines from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
 import { ApiStage } from './ApiStage';
