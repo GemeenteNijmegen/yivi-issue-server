@@ -1,5 +1,8 @@
 import * as core from 'aws-cdk-lib';
-import { Aspects } from 'aws-cdk-lib';
+import {
+  Aspects,
+  aws_codecommit as codecommit,
+} from 'aws-cdk-lib';
 import * as cdkpipelines from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
 import { ApiStage } from './ApiStage';
@@ -25,19 +28,19 @@ export class PipelineStack extends core.Stack {
     core.Tags.of(this).add('project', Statics.projectName);
 
     //Repo for the main cdk project
-    const repository = cdkpipelines.CodePipelineSource.connection(Statics.gitRepository, props.configuration.branchName, {
-      connectionArn: Statics.codeStarconnectionArnGnBuildNewLz,
-    });
-    // const repository = new codecommit.Repository(this, `${Statics.projectName}-repository`, {
-    //   repositoryName: `${Statics.projectName}`,
+    // const repository = cdkpipelines.CodePipelineSource.connection(Statics.gitRepository, props.configuration.branchName, {
+    //   connectionArn: Statics.codeStarconnectionArnGnBuildNewLz,
     // });
+    const repository = new codecommit.Repository(this, `${Statics.projectName}-repository`, {
+      repositoryName: `${Statics.projectName}`,
+    });
 
     // Construct the pipeline
     const pipeline = new cdkpipelines.CodePipeline(this, 'pipeline', {
       pipelineName: `yivi-issue-server-${props.configuration.branchName}`,
       crossAccountKeys: true,
       synth: new cdkpipelines.ShellStep('Synth', {
-        input: repository,
+        input: cdkpipelines.CodePipelineSource.codeCommit(repository, 'development'),
         env: {
           BRANCH_NAME: props.configuration.branchName,
         },

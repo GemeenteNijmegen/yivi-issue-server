@@ -17,7 +17,7 @@ export class Statics {
   static readonly codeStarConnectionArn = 'arn:aws:codestar-connections:eu-west-1:418648875085:connection/4f647929-c982-4f30-94f4-24ff7dbf9766';
   static readonly codeStarconnectionArnGnBuildNewLz = 'arn:aws:codestar-connections:eu-central-1:836443378780:connection/508a1593-8137-4b3b-b92d-4f8c1a6a6b1d';
   static readonly sandboxEnvironment = {
-    account: '095798249317',
+    account: '049753832279',
     region: 'eu-central-1',
   };
 
