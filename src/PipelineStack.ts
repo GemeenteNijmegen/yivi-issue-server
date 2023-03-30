@@ -33,6 +33,7 @@ export class PipelineStack extends core.Stack {
     // });
     const repository = new codecommit.Repository(this, `${Statics.projectName}-repository`, {
       repositoryName: `${Statics.projectName}`,
+      description: 'CDK test with yivi-issue-server codebase',
     });
 
     // Construct the pipeline
