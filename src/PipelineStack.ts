@@ -1,7 +1,6 @@
 import * as core from 'aws-cdk-lib';
 import {
   Aspects,
-  aws_codecommit as codecommit,
 } from 'aws-cdk-lib';
 import * as cdkpipelines from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
@@ -28,12 +27,8 @@ export class PipelineStack extends core.Stack {
     core.Tags.of(this).add('project', Statics.projectName);
 
     //Repo for the main cdk project
-    // const repository = cdkpipelines.CodePipelineSource.connection(Statics.gitRepository, props.configuration.branchName, {
-    //   connectionArn: Statics.codeStarconnectionArnGnBuildNewLz,
-    // });
-    const repository = new codecommit.Repository(this, `${Statics.projectName}-repository`, {
-      repositoryName: `${Statics.projectName}`,
-      description: 'CDK test with yivi-issue-server codebase',
+    const repository = cdkpipelines.CodePipelineSource.connection(Statics.gitRepository, props.configuration.branchName, {
+      connectionArn: props.configuration.codeStarConnectionArn,
     });
 
     // Construct the pipeline
@@ -41,7 +36,7 @@ export class PipelineStack extends core.Stack {
       pipelineName: `yivi-issue-server-${props.configuration.branchName}`,
       crossAccountKeys: true,
       synth: new cdkpipelines.ShellStep('Synth', {
-        input: cdkpipelines.CodePipelineSource.codeCommit(repository, 'development'),
+        input: repository,
         env: {
           BRANCH_NAME: props.configuration.branchName,
         },

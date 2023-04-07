@@ -14,8 +14,8 @@ export class Statics {
   static readonly ssmCloudfrontDistributionId: string = '/cdk/um-demo/ssm/cloudfront/dist-id';
 
   // Environments related statics
-  static readonly codeStarConnectionArn = 'arn:aws:codestar-connections:eu-west-1:418648875085:connection/4f647929-c982-4f30-94f4-24ff7dbf9766';
-  static readonly codeStarconnectionArnGnBuildNewLz = 'arn:aws:codestar-connections:eu-central-1:836443378780:connection/508a1593-8137-4b3b-b92d-4f8c1a6a6b1d';
+  static readonly codeStarConnectionArn = 'arn:aws:codestar-connections:eu-central-1:836443378780:connection/9d20671d-91bc-49e2-8680-59ff96e2ab11';
+
   static readonly sandboxEnvironment = {
     account: '095798249317',
     region: 'eu-central-1',
