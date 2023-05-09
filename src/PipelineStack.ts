@@ -44,7 +44,8 @@ export class PipelineStack extends core.Stack {
       }),
     });
 
-    pipeline.addStage(new DeploymentStage(this, 'yivi-issue-server-deployment', {
+    // This stage must have a branch dependent name as it lives in the gn-build account!
+    pipeline.addStage(new DeploymentStage(this, `yivi-issue-server-${props.configuration.branchName}-deployment`, {
       configuration: props.configuration,
     }));
 

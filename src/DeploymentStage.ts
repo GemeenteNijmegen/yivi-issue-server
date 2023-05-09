@@ -13,8 +13,8 @@ export interface DeploymentStageProps extends StageProps, Configurable {
 export class DeploymentStage extends Stage {
   constructor(scope: Construct, id: string, props: DeploymentStageProps) {
     super(scope, id, props);
-    new ContainerStack(this, 'container-build-stack', {
-      configuration: props.configuration
+    new ContainerStack(this, 'stack', {
+      configuration: props.configuration,
     });
   }
 }
