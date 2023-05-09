@@ -3,7 +3,7 @@ import { getConfiguration } from './Configuration';
 import { PipelineStack } from './PipelineStack';
 
 const buildBranch = process.env.BRANCH_NAME ?? 'development';
-console.log("Building branch", buildBranch);
+console.log('Building branch', buildBranch);
 const configuration = getConfiguration(buildBranch);
 
 const app = new App();

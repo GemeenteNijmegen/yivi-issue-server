@@ -2,9 +2,9 @@ import { Aspects, Stack, StackProps, Stage, StageProps, Tags, aws_ecr as ecr, aw
 import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
 import * as ecrdeploy from 'cdk-ecr-deployment';
 import { Construct } from 'constructs';
+import { PermissionsBoundaryAspect } from './Aspect';
 import { Configuration } from './Configuration';
 import { Statics } from './Statics';
-import { PermissionsBoundaryAspect } from './Aspect';
 
 export interface DeploymentStageProps extends StageProps {
   configuration: Configuration;

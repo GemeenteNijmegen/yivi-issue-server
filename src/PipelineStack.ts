@@ -6,8 +6,8 @@ import * as cdkpipelines from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
 import { PermissionsBoundaryAspect } from './Aspect';
 import { Configuration } from './Configuration';
-import { Statics } from './Statics';
 import { DeploymentStage } from './DeploymentStage';
+import { Statics } from './Statics';
 
 export interface PipelineStackProps extends core.StackProps {
   configuration: Configuration;
