@@ -3,10 +3,10 @@ import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
 import * as ecrdeploy from 'cdk-ecr-deployment';
 import { Construct } from 'constructs';
 import { PermissionsBoundaryAspect } from './Aspect';
-import { Configuration } from './Configuration';
+import { Configurable, Configuration } from './Configuration';
 import { Statics } from './Statics';
 
-export interface DeploymentStageProps extends StageProps {
+export interface DeploymentStageProps extends StageProps, Configurable {
   configuration: Configuration;
 }
 
@@ -14,12 +14,12 @@ export class DeploymentStage extends Stage {
   constructor(scope: Construct, id: string, props: DeploymentStageProps) {
     super(scope, id, props);
     new ContainerStack(this, 'container-build-stack', {
-      ...props.configuration,
+      configuration: props.configuration
     });
   }
 }
 
-interface DeploymentStackProps extends StackProps, Configuration { }
+interface DeploymentStackProps extends StackProps, Configurable { }
 
 class ContainerStack extends Stack {
 
@@ -28,7 +28,7 @@ class ContainerStack extends Stack {
 
     Aspects.of(this).add(new PermissionsBoundaryAspect('/', 'landingzone-workload-permissions-boundary'));
 
-    const repositoryName = `yivi-issue-server-${props.branchName}`;
+    const repositoryName = `yivi-issue-server-${props.configuration.branchName}`;
     this.createRepository(repositoryName, props);
     const img = this.buildContainer(props);
     this.moveImageToRepository(repositoryName, img);
@@ -45,7 +45,7 @@ class ContainerStack extends Stack {
     // Allow the account to which we deploy to pull the images from this repository
     repository.addToResourcePolicy(new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
-      principals: [new iam.AccountPrincipal(props.deployToEnvironment.account)],
+      principals: [new iam.AccountPrincipal(props.configuration.deployToEnvironment.account)],
       actions: [
         'ecr:BatchGetImage',
         'ecr:GetDownloadUrlForLayer',
@@ -59,7 +59,7 @@ class ContainerStack extends Stack {
     const img = new DockerImageAsset(this, 'image', {
       directory: './src/container',
       buildArgs: {
-        BUILD_FOR_ENVIRONMENT: props.branchName,
+        BUILD_FOR_ENVIRONMENT: props.configuration.branchName,
       },
     });
     Tags.of(img).add('image', Statics.projectName);
