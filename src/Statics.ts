@@ -16,8 +16,8 @@ export class Statics {
   // Environments related statics
   static readonly codeStarConnectionArn = 'arn:aws:codestar-connections:eu-central-1:836443378780:connection/9d20671d-91bc-49e2-8680-59ff96e2ab11';
 
-  static readonly sandboxEnvironment = {
-    account: '095798249317',
+  static readonly acceptanceEnvironment = {
+    account: '528030426040',
     region: 'eu-central-1',
   };
 

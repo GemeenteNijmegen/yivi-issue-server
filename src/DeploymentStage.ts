@@ -1,9 +1,10 @@
-import { Stack, StackProps, Stage, StageProps, Tags, aws_ecr as ecr, aws_iam as iam } from 'aws-cdk-lib';
+import { Aspects, Stack, StackProps, Stage, StageProps, Tags, aws_ecr as ecr, aws_iam as iam } from 'aws-cdk-lib';
 import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
 import * as ecrdeploy from 'cdk-ecr-deployment';
 import { Construct } from 'constructs';
 import { Configuration } from './Configuration';
 import { Statics } from './Statics';
+import { PermissionsBoundaryAspect } from './Aspect';
 
 export interface DeploymentStageProps extends StageProps {
   configuration: Configuration;
@@ -24,6 +25,8 @@ class ContainerStack extends Stack {
 
   constructor(scope: Construct, id: string, props: DeploymentStackProps) {
     super(scope, id, props);
+
+    Aspects.of(this).add(new PermissionsBoundaryAspect('/', 'landingzone-workload-permissions-boundary'));
 
     const repositoryName = `yivi-issue-server-${props.branchName}`;
     this.createRepository(repositoryName, props);

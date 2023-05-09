@@ -4,10 +4,10 @@ import {
 } from 'aws-cdk-lib';
 import * as cdkpipelines from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
-import { ApiStage } from './ApiStage';
 import { PermissionsBoundaryAspect } from './Aspect';
 import { Configuration } from './Configuration';
 import { Statics } from './Statics';
+import { DeploymentStage } from './DeploymentStage';
 
 export interface PipelineStackProps extends core.StackProps {
   configuration: Configuration;
@@ -47,14 +47,14 @@ export class PipelineStack extends core.Stack {
       }),
     });
 
-    // pipeline.addStage(new DeploymentStage(this, 'yivi-issue-server-deployment', {
-    //   configuration: props.configuration,
-    // }));
+    pipeline.addStage(new DeploymentStage(this, 'yivi-issue-server-deployment', {
+      configuration: props.configuration,
+    }));
 
     // if (!props.emptyPipeline) {
-    pipeline.addStage(new ApiStage(this, 'yivi-issue-server', {
-      ...props.configuration,
-    }));
+    // pipeline.addStage(new ApiStage(this, 'yivi-issue-server', {
+    //   ...props.configuration,
+    // }));
     // }
 
     // TODO figure out an request to check if the container is actually live and reachable
