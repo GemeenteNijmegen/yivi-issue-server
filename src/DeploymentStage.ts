@@ -1,4 +1,15 @@
-import { Aspects, Stack, StackProps, Stage, StageProps, Tags, aws_ecr as ecr, aws_iam as iam } from 'aws-cdk-lib';
+import {
+  Aspects,
+  Stack,
+  StackProps,
+  Stage,
+  StageProps,
+  Tags,
+  aws_ecr as ecr,
+  aws_iam as iam,
+  aws_events_targets as targets,
+  aws_sns as sns,
+} from 'aws-cdk-lib';
 import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
 import * as ecrdeploy from 'cdk-ecr-deployment';
 import { Construct } from 'constructs';
@@ -41,6 +52,15 @@ class ContainerStack extends Stack {
       imageScanOnPush: true,
       repositoryName: repositoryName,
     });
+    repository.addLifecycleRule({ description: 'Max 15 images', maxImageCount: 15 });
+
+    // Setup notifications for findings
+    // TODO find out if this is needed as we'll catch inspector findings from eventbridge aswell
+    const topic = sns.Topic.fromTopicArn(this, 'topic', Statics.notificationTopicArn(this.account, 'medium'));
+    repository.onImageScanCompleted('scan-complete', {
+      description: 'Image scan complete notification',
+      target: new targets.SnsTopic(topic),
+    });
 
     // Allow the account to which we deploy to pull the images from this repository
     repository.addToResourcePolicy(new iam.PolicyStatement({
@@ -51,6 +71,7 @@ class ContainerStack extends Stack {
         'ecr:GetDownloadUrlForLayer',
       ],
     }));
+
   }
 
   buildContainer(props: DeploymentStackProps) {

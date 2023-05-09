@@ -27,4 +27,7 @@ export class Statics {
   };
 
 
+  static notificationTopicArn = (account: string, priority: 'critical' | 'high' | 'medium' | 'low') => `arn:aws:sns:eu-central-1:${account}:landingzone-platform-events-${priority}`;
+
+
 }
