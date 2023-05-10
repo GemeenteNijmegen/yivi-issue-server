@@ -2,8 +2,8 @@ import { Aspects, Stage, StageProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { PermissionsBoundaryAspect } from './Aspect';
 import { Configuration } from './Configuration';
-import { ParameterStack } from './ParameterStack';
 import { ContainerClusterStack } from './ContainerCluster';
+import { ParameterStack } from './ParameterStack';
 
 export interface ApiStageProps extends StageProps, Configuration {}
 
