@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import { PermissionsBoundaryAspect } from './Aspect';
 import { Configuration } from './Configuration';
 import { ParameterStack } from './ParameterStack';
+import { ContainerClusterStack } from './ContainerCluster';
 
 export interface ApiStageProps extends StageProps, Configuration {}
 
@@ -13,29 +14,20 @@ export class ApiStage extends Stage {
 
     Aspects.of(this).add(new PermissionsBoundaryAspect('/', 'landingzone-workload-permissions-boundary'));
 
-    new ParameterStack(this, 'parameter-stack', {
+    const parameterStack = new ParameterStack(this, 'parameter-stack', {
       env: props.deployToEnvironment,
       description: 'Parameters and secrets for yivi-issue-server',
     });
 
-    // const certificateStack = new CertStack(this, 'certificate-stack', {
-    //   env: {
-    //     account: props.deployToEnvironment.account,
-    //     region: 'us-east-1',
-    //   },
+
+    // TODO build database stack RDS en configure container to use redis
+    // const databaseStack = new DatabaseStack(this, 'database-stack', {
     // });
 
-    // // TODO check if we need a cloudfront stack or just an API gateway
-    // const cloudfrontStack = new CloudfrontStack(this, 'cloudfront-stack', {
-    //   env: props.deployToEnvironment,
-    // });
-    // cloudfrontStack.addDependency(certificateStack);
-
-    // const cluster = new ContainerClusterStack(this, 'cluster-stack', {
-    //   env: props.deployToEnvironment,
-    //   description: 'ecs cluster and services for yivi-issue-server',
-    // });
-    // cluster.addDependency(cloudfrontStack);
-    // cluster.addDependency(parameterStack);
+    const cluster = new ContainerClusterStack(this, 'cluster-stack', {
+      env: props.deployToEnvironment,
+      description: 'ecs cluster and services for yivi-issue-server',
+    });
+    cluster.addDependency(parameterStack);
   }
 }

@@ -22,45 +22,42 @@ export class ContainerClusterStack extends Stack {
   constructor(scope: Construct, id: string, props: ContainerClusterStackProps) {
     super(scope, id, props);
 
-
-    const vpc = this.setupVpc();
-    const listner = this.setupLoadbalancer(vpc);
-    const cluster = this.constructEcsCluster(vpc);
-
-    this.addHelloWorldService(cluster, listner);
+    this.setupVpc();
+    //const listner = this.setupLoadbalancer(vpc);
+    //const cluster = this.constructEcsCluster(vpc);
+    //this.addHelloWorldService(cluster, listner);
   }
 
   private setupVpc() {
-    // Import vpc config
-    const routeTablePublicSubnet1Id = ssm.StringParameter.valueForStringParameter(this, '/gemeentenijmegen/vpc/route-table-public-subnet-id');
-    const routeTablePublicSubnet2Id = ssm.StringParameter.valueForStringParameter(this, '/gemeentenijmegen/vpc/route-table-public-subnet-id');
-    const routeTablePublicSubnet3Id = ssm.StringParameter.valueForStringParameter(this, '/gemeentenijmegen/vpc/route-table-public-subnet-id');
 
-    //VPC setup for ECS cluster
+    // Import vpc config (only public and private subnets)
+    const vpcId = ssm.StringParameter.valueForStringParameter(this, '/landingzone/vpc/vpc-id');
+    const availabilityZones = [0, 1, 2].map(i => Fn.select(i, Fn.getAzs(Aws.REGION)));
+    const publicSubnetRouteTableIds = Array(3).fill(ssm.StringParameter.valueForStringParameter(this, '/landingzone/vpc/route-table-public-subnets-id'));
+    const privateSubnetRouteTableIds = [1, 2, 3].map(i => ssm.StringParameter.valueForStringParameter(this, `/landingzone/vpc/route-table-private-subnet-${i}-id`));
+    const publicSubnetIds = [1, 2, 3].map(i => ssm.StringParameter.valueForStringParameter(this, `/landingzone/vpc/public-subnet-${i}-id`));
+    const privateSubnetIds = [1, 2, 3].map(i => ssm.StringParameter.valueForStringParameter(this, `/landingzone/vpc/private-subnet-${i}-id`));
+
     const vpc = ec2.Vpc.fromVpcAttributes(this, 'vpc', {
-      vpcId: ssm.StringParameter.valueForStringParameter(this, '/gemeentenijmegen/vpc/vpc-id'),
-      availabilityZones: [0, 1, 2].map(i => Fn.select(i, Fn.getAzs(Aws.REGION))),
-      privateSubnetRouteTableIds: [1, 2, 3].map(i => ssm.StringParameter.valueForStringParameter(this, `/gemeentenijmegen/vpc/route-table-private-subnet-${i}-id`)),
-      publicSubnetRouteTableIds: [
-        routeTablePublicSubnet1Id,
-        routeTablePublicSubnet2Id,
-        routeTablePublicSubnet3Id,
-      ],
-      publicSubnetIds: [1, 2, 3].map(i => ssm.StringParameter.valueForStringParameter(this, `/gemeentenijmegen/vpc/public-subnet-${i}-id`)),
-      privateSubnetIds: [1, 2, 3].map(i => ssm.StringParameter.valueForStringParameter(this, `/gemeentenijmegen/vpc/private-subnet-${i}-id`)),
+      vpcId,
+      availabilityZones,
+      privateSubnetRouteTableIds,
+      publicSubnetRouteTableIds,
+      publicSubnetIds,
+      privateSubnetIds,
     });
 
     return vpc;
   }
 
-  private constructEcsCluster(vpc: ec2.IVpc) {
-    /**
-     * Create an ECS cluster
-     * By not providing a VPC we are creating a new VPC for this cluster
-     */
+  /**
+   * Create an ECS cluster
+   * If a VPC is not provided we are creating a new one for this cluster
+   */
+  constructEcsCluster(vpc: ec2.IVpc) {
     const cluster = new ecs.Cluster(this, 'cluster', {
       vpc,
-      clusterName: 'um-demo',
+      clusterName: 'yivi-issue-cluster',
       enableFargateCapacityProviders: true, // Allows usage of spot instances
     });
 
@@ -69,7 +66,7 @@ export class ContainerClusterStack extends Stack {
     return cluster;
   }
 
-  private setupLoadbalancer(vpc: ec2.IVpc) {
+  setupLoadbalancer(vpc: ec2.IVpc) {
 
     // Import account hosted zone
     const accountRootZoneId = ssm.StringParameter.valueForStringParameter(this, Statics.accountRootHostedZoneId);
@@ -115,7 +112,7 @@ export class ContainerClusterStack extends Stack {
   }
 
 
-  private addHelloWorldService(cluster: ecs.Cluster, listner: loadbalancing.IApplicationListener) {
+  addHelloWorldService(cluster: ecs.Cluster, listner: loadbalancing.IApplicationListener) {
     new EcsFargateService(this, 'service-1', {
       serviceName: 'test',
       containerImage: 'nginxdemos/hello',

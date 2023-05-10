@@ -8,6 +8,7 @@ import { PermissionsBoundaryAspect } from './Aspect';
 import { Configurable } from './Configuration';
 import { DeploymentStage } from './DeploymentStage';
 import { Statics } from './Statics';
+import { ApiStage } from './ApiStage';
 
 export interface PipelineStackProps extends core.StackProps, Configurable {}
 
@@ -49,11 +50,9 @@ export class PipelineStack extends core.Stack {
       configuration: props.configuration,
     }));
 
-    // if (!props.emptyPipeline) {
-    // pipeline.addStage(new ApiStage(this, 'yivi-issue-server', {
-    //   ...props.configuration,
-    // }));
-    // }
+    pipeline.addStage(new ApiStage(this, 'yivi-issue-server', {
+      ...props.configuration,
+    }));
 
     // TODO figure out an request to check if the container is actually live and reachable
     // if (props.runValidationChecks) {
