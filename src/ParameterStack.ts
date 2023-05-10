@@ -1,5 +1,5 @@
-import { 
-  Stack, 
+import {
+  Stack,
   StackProps,
   aws_ssm as ssm,
 } from 'aws-cdk-lib';
@@ -17,7 +17,7 @@ export class ParameterStack extends Stack {
       description: 'Loadbalancer API gateway authentication header',
       stringValue: '-',
     });
-    
+
   }
 
 }

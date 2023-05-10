@@ -53,16 +53,16 @@ export class ContainerClusterStack extends Stack {
     return vpc;
   }
 
-  importHostedZone(){
+  importHostedZone() {
     const id = ssm.StringParameter.valueForStringParameter(this, Statics.ssmHostedZoneId);
     const name = ssm.StringParameter.valueForStringParameter(this, Statics.ssmHostedZoneName);
     return route53.HostedZone.fromHostedZoneAttributes(this, 'hostedzone', {
       hostedZoneId: id,
       zoneName: name,
-    })
+    });
   }
 
-  setupApiGateway(hostedzone: route53.IHostedZone){
+  setupApiGateway(hostedzone: route53.IHostedZone) {
 
     const cert = new acm.Certificate(this, 'api-cert', {
       domainName: hostedzone.zoneName,
@@ -73,8 +73,11 @@ export class ContainerClusterStack extends Stack {
       domainName: {
         certificate: cert,
         domainName: hostedzone.zoneName,
-      }
+      },
     });
+
+    // Temp method to test integration
+    api.root.addMethod('GET', new apigateway.HttpIntegration('https://nijmegen.nl'));
 
     return api;
   }

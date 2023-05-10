@@ -1,10 +1,10 @@
 import { Aspects, Stage, StageProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { PermissionsBoundaryAspect } from './Aspect';
-import { ContainerClusterStack } from './ContainerCluster';
-import { ParameterStack } from './ParameterStack';
-import { DnsStack } from './DnsStack';
 import { Configurable } from './Configuration';
+import { ContainerClusterStack } from './ContainerCluster';
+import { DnsStack } from './DnsStack';
+import { ParameterStack } from './ParameterStack';
 
 export interface ApiStageProps extends StageProps, Configurable {}
 
@@ -21,7 +21,7 @@ export class ApiStage extends Stage {
     });
 
     const dnsStack = new DnsStack(this, 'dns-stack', {
-      configuration: props.configuration
+      configuration: props.configuration,
     });
 
     const cluster = new ContainerClusterStack(this, 'cluster-stack', {

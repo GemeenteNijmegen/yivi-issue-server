@@ -51,7 +51,7 @@ export class PipelineStack extends core.Stack {
     }));
 
     pipeline.addStage(new ApiStage(this, 'yivi-issue-server', {
-      ...props.configuration,
+      configuration: props.configuration,
     }));
 
     // TODO figure out an request to check if the container is actually live and reachable

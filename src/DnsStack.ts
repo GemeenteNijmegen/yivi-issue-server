@@ -1,18 +1,18 @@
-import { 
-  Stack, 
+import {
+  Stack,
   StackProps,
   aws_route53 as route53,
   aws_ssm as ssm,
-} from "aws-cdk-lib";
-import { Construct } from "constructs";
-import { Configurable } from "./Configuration";
-import { Statics } from "./Statics";
+} from 'aws-cdk-lib';
+import { Construct } from 'constructs';
+import { Configurable } from './Configuration';
+import { Statics } from './Statics';
 
 export interface DnsStackProps extends StackProps, Configurable {}
 
 export class DnsStack extends Stack {
 
-  constructor(scope: Construct, id: string, props: DnsStackProps){
+  constructor(scope: Construct, id: string, props: DnsStackProps) {
     super(scope, id, props);
 
     const accountHzId = ssm.StringParameter.valueForStringParameter(this, Statics.ssmAccountHostedZoneId);
@@ -35,7 +35,6 @@ export class DnsStack extends Stack {
       parameterName: Statics.ssmHostedZoneName,
       stringValue: hostedzone.zoneName,
     });
-
 
 
   }
