@@ -81,6 +81,8 @@ class ContainerStack extends Stack {
       directory: './src/container',
       buildArgs: {
         BUILD_FOR_ENVIRONMENT: props.configuration.branchName,
+        IRMA_VERSION: props.configuration.yiviVersionNumber,
+        IRMA_CHECKSUM: props.configuration.yiviVersionChecksum,
       },
     });
     Tags.of(img).add('image', Statics.projectName);
