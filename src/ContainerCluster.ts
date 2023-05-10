@@ -8,6 +8,7 @@ import {
   aws_route53 as route53,
   aws_route53_targets as route53Targets,
   aws_certificatemanager as acm,
+  aws_apigateway as apigateway,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { EcsFargateService } from './constructs/EcsFargateService';
@@ -22,13 +23,15 @@ export class ContainerClusterStack extends Stack {
   constructor(scope: Construct, id: string, props: ContainerClusterStackProps) {
     super(scope, id, props);
 
+    const hostedzone = this.importHostedZone();
+    this.setupApiGateway(hostedzone);
     this.setupVpc();
     //const listner = this.setupLoadbalancer(vpc);
     //const cluster = this.constructEcsCluster(vpc);
     //this.addHelloWorldService(cluster, listner);
   }
 
-  private setupVpc() {
+  setupVpc() {
 
     // Import vpc config (only public and private subnets)
     const vpcId = ssm.StringParameter.valueForStringParameter(this, '/landingzone/vpc/vpc-id');
@@ -50,6 +53,32 @@ export class ContainerClusterStack extends Stack {
     return vpc;
   }
 
+  importHostedZone(){
+    const id = ssm.StringParameter.valueForStringParameter(this, Statics.ssmHostedZoneId);
+    const name = ssm.StringParameter.valueForStringParameter(this, Statics.ssmHostedZoneName);
+    return route53.HostedZone.fromHostedZoneAttributes(this, 'hostedzone', {
+      hostedZoneId: id,
+      zoneName: name,
+    })
+  }
+
+  setupApiGateway(hostedzone: route53.IHostedZone){
+
+    const cert = new acm.Certificate(this, 'api-cert', {
+      domainName: hostedzone.zoneName,
+      validation: acm.CertificateValidation.fromDns(hostedzone),
+    });
+
+    const api = new apigateway.RestApi(this, 'api', {
+      domainName: {
+        certificate: cert,
+        domainName: hostedzone.zoneName,
+      }
+    });
+
+    return api;
+  }
+
   /**
    * Create an ECS cluster
    * If a VPC is not provided we are creating a new one for this cluster
@@ -66,21 +95,13 @@ export class ContainerClusterStack extends Stack {
     return cluster;
   }
 
-  setupLoadbalancer(vpc: ec2.IVpc) {
-
-    // Import account hosted zone
-    const accountRootZoneId = ssm.StringParameter.valueForStringParameter(this, Statics.accountRootHostedZoneId);
-    const accountRootZoneName = ssm.StringParameter.valueForStringParameter(this, Statics.accountRootHostedZoneName);
-    const accountRootZone = route53.HostedZone.fromHostedZoneAttributes(this, 'account-root-zone', {
-      hostedZoneId: accountRootZoneId,
-      zoneName: accountRootZoneName,
-    });
+  setupLoadbalancer(vpc: ec2.IVpc, hostedzone: route53.HostedZone) {
 
     // Get a certificate
-    const albWebFormsDomainName = `alb.${accountRootZoneName}`;
+    const albWebFormsDomainName = `alb.${hostedzone.zoneName}`;
     const albCertificate = new acm.Certificate(this, 'loadbalancer-certificate', {
       domainName: albWebFormsDomainName,
-      validation: acm.CertificateValidation.fromDns(accountRootZone),
+      validation: acm.CertificateValidation.fromDns(hostedzone),
     });
 
 
@@ -101,7 +122,7 @@ export class ContainerClusterStack extends Stack {
     });
 
     new route53.ARecord(this, 'loadbalancer-a-record', {
-      zone: accountRootZone,
+      zone: hostedzone,
       recordName: 'alb',
       target: route53.RecordTarget.fromAlias(new route53Targets.LoadBalancerTarget(loadbalancer)),
       comment: 'webformulieren load balancer a record',

@@ -1,11 +1,12 @@
 import { Aspects, Stage, StageProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { PermissionsBoundaryAspect } from './Aspect';
-import { Configuration } from './Configuration';
 import { ContainerClusterStack } from './ContainerCluster';
 import { ParameterStack } from './ParameterStack';
+import { DnsStack } from './DnsStack';
+import { Configurable } from './Configuration';
 
-export interface ApiStageProps extends StageProps, Configuration {}
+export interface ApiStageProps extends StageProps, Configurable {}
 
 export class ApiStage extends Stage {
 
@@ -15,19 +16,19 @@ export class ApiStage extends Stage {
     Aspects.of(this).add(new PermissionsBoundaryAspect('/', 'landingzone-workload-permissions-boundary'));
 
     const parameterStack = new ParameterStack(this, 'parameter-stack', {
-      env: props.deployToEnvironment,
+      env: props.configuration.deployToEnvironment,
       description: 'Parameters and secrets for yivi-issue-server',
     });
 
-
-    // TODO build database stack RDS en configure container to use redis
-    // const databaseStack = new DatabaseStack(this, 'database-stack', {
-    // });
+    const dnsStack = new DnsStack(this, 'dns-stack', {
+      configuration: props.configuration
+    });
 
     const cluster = new ContainerClusterStack(this, 'cluster-stack', {
-      env: props.deployToEnvironment,
+      env: props.configuration.deployToEnvironment,
       description: 'ecs cluster and services for yivi-issue-server',
     });
     cluster.addDependency(parameterStack);
+    cluster.addDependency(dnsStack);
   }
 }
