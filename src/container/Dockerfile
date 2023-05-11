@@ -1,9 +1,8 @@
 # BUILD IMAGE
 FROM alpine:3 as getter
 
-# Inserted during build in the pipeline
-#ARG IRMA_VERSION=v0.12.1
-#ARG IRMA_CHECKSUM=d772b84c42379fed2a50ce3375ff14522e32dce38298a6797f496db0f5e1d373
+ARG IRMA_VERSION
+ARG IRMA_CHECKSUM
  
 RUN wget -q -O /irma https://github.com/privacybydesign/irmago/releases/download/${IRMA_VERSION}/irma-linux-amd64 && \
     echo "${IRMA_CHECKSUM}  /irma" | sha256sum -c && \
