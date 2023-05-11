@@ -31,7 +31,7 @@ export class PipelineStack extends core.Stack {
     });
 
     // Construct the pipeline
-    const dockerHubSecret = secretsmanager.Secret.fromSecretNameV2(this, 'dockerhub-secret', Statics.secretDockerhub);
+    const dockerHubSecret = this.setupDockerhubSecret();
     const pipeline = new cdkpipelines.CodePipeline(this, 'pipeline', {
       pipelineName: `yivi-issue-server-${props.configuration.branchName}`,
       crossAccountKeys: true,
@@ -68,4 +68,12 @@ export class PipelineStack extends core.Stack {
     // }
 
   }
+
+  setupDockerhubSecret(){
+    return new secretsmanager.Secret(this, 'dockerhub-secret', {
+      description: 'Dockerhub secret for yivi-brp-issue server',
+      secretName: Statics.secretDockerhub,
+    })
+  }
+
 }
