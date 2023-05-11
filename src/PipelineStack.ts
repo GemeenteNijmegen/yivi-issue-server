@@ -1,6 +1,7 @@
 import * as core from 'aws-cdk-lib';
 import {
   Aspects,
+  aws_secretsmanager as secretsmanager,
 } from 'aws-cdk-lib';
 import * as cdkpipelines from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
@@ -30,6 +31,7 @@ export class PipelineStack extends core.Stack {
     });
 
     // Construct the pipeline
+    const dockerHubSecret = secretsmanager.Secret.fromSecretNameV2(this, 'dockerhub-secret', Statics.secretDockerhub);
     const pipeline = new cdkpipelines.CodePipeline(this, 'pipeline', {
       pipelineName: `yivi-issue-server-${props.configuration.branchName}`,
       crossAccountKeys: true,
@@ -43,6 +45,9 @@ export class PipelineStack extends core.Stack {
           'yarn build',
         ],
       }),
+      dockerCredentials: [
+        cdkpipelines.DockerCredential.dockerHub(dockerHubSecret),
+      ],
     });
 
     // This stage must have a branch dependent name as it lives in the gn-build account!

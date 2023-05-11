@@ -17,6 +17,8 @@ export class Statics {
 
   static readonly ssmLoadbalancerSecurityHeader: string = '/yivi-brp-issue/loadbalancer/header';
 
+  static readonly secretDockerhub = '/yivi-brp-issue/pipeline/dockerhub';
+
   // Environments related statics
   static readonly codeStarConnectionArn = 'arn:aws:codestar-connections:eu-central-1:836443378780:connection/9d20671d-91bc-49e2-8680-59ff96e2ab11';
 
