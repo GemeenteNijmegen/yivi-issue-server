@@ -21,6 +21,7 @@ export class ApiStage extends Stage {
     });
 
     const dnsStack = new DnsStack(this, 'dns-stack', {
+      env: props.configuration.deployToEnvironment,
       configuration: props.configuration,
     });
 
