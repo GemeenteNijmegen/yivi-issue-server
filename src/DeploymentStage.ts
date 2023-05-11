@@ -41,8 +41,8 @@ class ContainerStack extends Stack {
 
     const repositoryName = `yivi-issue-server-${props.configuration.branchName}`;
     this.createRepository(repositoryName, props);
-    const img = this.buildContainer(props);
-    this.moveImageToRepository(repositoryName, img);
+    //const img = this.buildContainer(props);
+    //this.moveImageToRepository(repositoryName, img);
 
   }
 
