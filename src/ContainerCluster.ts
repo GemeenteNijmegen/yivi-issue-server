@@ -27,9 +27,9 @@ export class ContainerClusterStack extends Stack {
 
     const hostedzone = this.importHostedZone();
     this.setupApiGateway(hostedzone);
-    this.setupVpc();
-    //const listner = this.setupLoadbalancer(vpc);
-    //const cluster = this.constructEcsCluster(vpc);
+    const vpc = this.setupVpc();
+    this.setupLoadbalancer(vpc, hostedzone);
+    this.constructEcsCluster(vpc);
     //this.addHelloWorldService(cluster, listner);
   }
 
@@ -97,7 +97,7 @@ export class ContainerClusterStack extends Stack {
     return cluster;
   }
 
-  setupLoadbalancer(vpc: ec2.IVpc, hostedzone: route53.HostedZone) {
+  setupLoadbalancer(vpc: ec2.IVpc, hostedzone: route53.IHostedZone) {
 
     // Get a certificate
     const albWebFormsDomainName = `alb.${hostedzone.zoneName}`;
@@ -105,7 +105,6 @@ export class ContainerClusterStack extends Stack {
       domainName: albWebFormsDomainName,
       validation: acm.CertificateValidation.fromDns(hostedzone),
     });
-
 
     // Construct the loadbalancer
     const loadbalancer = new loadbalancing.ApplicationLoadBalancer(this, 'loadbalancer', {
@@ -127,7 +126,7 @@ export class ContainerClusterStack extends Stack {
       zone: hostedzone,
       recordName: 'alb',
       target: route53.RecordTarget.fromAlias(new route53Targets.LoadBalancerTarget(loadbalancer)),
-      comment: 'webformulieren load balancer a record',
+      comment: 'ALB A record for yivi issue server',
     });
 
     vpc.node.addDependency(loadbalancer);
