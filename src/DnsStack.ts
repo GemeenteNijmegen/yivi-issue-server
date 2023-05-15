@@ -32,6 +32,7 @@ export class DnsStack extends Stack {
     new route53.ZoneDelegationRecord(this, 'delegate', {
       zone: accountHz,
       nameServers: hostedzone.hostedZoneNameServers,
+      recordName: 'issue',
     });
 
     new ssm.StringParameter(this, 'ssm-hz-id', {
