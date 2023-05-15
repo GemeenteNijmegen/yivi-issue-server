@@ -69,11 +69,11 @@ export class PipelineStack extends core.Stack {
 
   }
 
-  setupDockerhubSecret(){
+  setupDockerhubSecret() {
     return new secretsmanager.Secret(this, 'dockerhub-secret', {
       description: 'Dockerhub secret for yivi-brp-issue server',
       secretName: Statics.secretDockerhub,
-    })
+    });
   }
 
 }

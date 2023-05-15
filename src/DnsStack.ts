@@ -26,13 +26,13 @@ export class DnsStack extends Stack {
       zoneName: `issue.${accountHz.zoneName}`,
     });
 
-    if(!hostedzone.hostedZoneNameServers){
+    if (!hostedzone.hostedZoneNameServers) {
       throw Error('No name servers!');
     }
     new route53.ZoneDelegationRecord(this, 'delegate', {
       zone: accountHz,
       nameServers: hostedzone.hostedZoneNameServers,
-    })
+    });
 
     new ssm.StringParameter(this, 'ssm-hz-id', {
       parameterName: Statics.ssmHostedZoneId,
