@@ -7,10 +7,11 @@ import {
   aws_route53 as route53,
   aws_route53_targets as route53Targets,
   aws_certificatemanager as acm,
-  aws_apigateway as apigateway,
   aws_kms as kms,
   aws_iam as iam,
 } from 'aws-cdk-lib';
+import * as apigatewayv2 from '@aws-cdk/aws-apigatewayv2-alpha';
+import * as apigatewayv2Integrations from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
 import { EcsFargateService } from './constructs/EcsFargateService';
@@ -24,10 +25,10 @@ export class ContainerClusterStack extends Stack {
     super(scope, id, props);
 
     const hostedzone = this.importHostedZone();
-    this.setupApiGateway(hostedzone, props);
     const vpc = this.setupVpc();
     const listner = this.setupLoadbalancer(vpc, hostedzone);
     const cluster = this.constructEcsCluster(vpc);
+    this.setupApiGateway(hostedzone, listner);
     this.addHelloWorldService(cluster, listner, props);
   }
 
@@ -62,31 +63,28 @@ export class ContainerClusterStack extends Stack {
     });
   }
 
-  setupApiGateway(hostedzone: route53.IHostedZone, props: ContainerClusterStackProps) {
+  setupApiGateway(hostedzone: route53.IHostedZone, listner: loadbalancing.ApplicationListener) {
 
     const cert = new acm.Certificate(this, 'api-cert', {
       domainName: hostedzone.zoneName,
       validation: acm.CertificateValidation.fromDns(hostedzone),
     });
 
-    const api = new apigateway.RestApi(this, 'api', {
-      domainName: {
-        certificate: cert,
-        domainName: hostedzone.zoneName,
+    const domainname = new apigatewayv2.DomainName(this, 'api-domain', {
+      certificate: cert,
+      domainName: hostedzone.zoneName,
+    });
+
+    const api = new apigatewayv2.HttpApi(this, 'api', {
+      description: 'API gateway for yivi-brp issue server',
+      defaultDomainMapping: {
+        domainName: domainname,
       },
     });
 
-    const albUrl = `https://alb.${hostedzone.zoneName}`
-    console.log('Seting up proxy for alb using url', albUrl)
-    api.root.addProxy({
-      anyMethod: true,
-      defaultIntegration: new apigateway.HttpIntegration(albUrl, {
-        options: {
-          requestParameters: {
-            'integration.request.header.X-API-gateway-Access-Token': props.configuration.apiGatewayAlbSecurityToken,
-          },
-        },
-      }),
+    api.addRoutes({
+      path: '/',
+      integration: new apigatewayv2Integrations.HttpAlbIntegration('api-integration', listner);
     });
 
     return api;
@@ -117,7 +115,6 @@ export class ContainerClusterStack extends Stack {
     // Construct the loadbalancer
     const loadbalancer = new loadbalancing.ApplicationLoadBalancer(this, 'loadbalancer', {
       vpc,
-      internetFacing: true, // Expose to internet (not internal to vpc)
     });
     // Security hub finding, do not accept invalid http headers
     loadbalancer.setAttribute('routing.http.drop_invalid_header_fields.enabled', 'true');
