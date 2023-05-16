@@ -3,6 +3,7 @@ import {
   aws_ecs as ecs,
   aws_secretsmanager as secrets,
   aws_elasticloadbalancingv2 as loadbalancing,
+  Duration,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 
@@ -57,6 +58,10 @@ export interface EcsFargateServiceProps {
    */
   useSpotInstances?: boolean;
 
+  /**
+   * Path the call on the container during health check
+   */
+  healthCheckPath: string;
 }
 
 
@@ -103,18 +108,16 @@ export class EcsFargateService extends Construct {
       targets: [service],
       conditions,
       priority: 10,
-      // TODO healthcheck for all containers
-      // healthCheck: {
-      //   enabled: true,
-      //   path: props.healthCheckSettings.path,
-      //   healthyHttpCodes: '200',
-      //   healthyThresholdCount: 2,
-      //   unhealthyThresholdCount: 6,
-      //   timeout: Duration.seconds(10),
-      //   interval: Duration.seconds(15),
-      //   protocol: elasticloadbalancingv2.Protocol.HTTP,
-      // },
-      //deregistrationDelay: Duration.minutes(1),
+      healthCheck: {
+        enabled: true,
+        path: props.healthCheckPath,
+        healthyHttpCodes: '200',
+        healthyThresholdCount: 2,
+        unhealthyThresholdCount: 6,
+        timeout: Duration.seconds(10),
+        interval: Duration.seconds(15),
+        // protocol: loa,
+      },
     });
   }
 

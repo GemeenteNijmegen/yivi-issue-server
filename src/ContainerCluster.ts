@@ -148,6 +148,7 @@ export class ContainerClusterStack extends Stack {
       serviceListnerPath: '/*',
       desiredtaskcount: 1,
       useSpotInstances: true,
+      healthCheckPath: '/status',
     });
   }
 
