@@ -14,7 +14,6 @@ import {
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
-import { EcsFargateService } from './constructs/EcsFargateService';
 import { Statics } from './Statics';
 
 export interface ContainerClusterStackProps extends StackProps, Configurable {}
@@ -138,25 +137,25 @@ export class ContainerClusterStack extends Stack {
     return listner;
   }
 
-  addIssueService(cluster: ecs.Cluster, listner: loadbalancing.IApplicationListener, props: ContainerClusterStackProps) {
+  addIssueService(_cluster: ecs.Cluster, _listner: loadbalancing.IApplicationListener, _props: ContainerClusterStackProps) {
 
-    const region = props.configuration.deployFromEnvironment.region;
-    const account = props.configuration.deployFromEnvironment.account;
-    const branch = props.configuration.branchName;
-    const ecrRepositoryArn = `arn:aws:ecr:${region}:${account}:repository/yivi-issue-server-${branch}`;
+    // const region = props.configuration.deployFromEnvironment.region;
+    // const account = props.configuration.deployFromEnvironment.account;
+    // const branch = props.configuration.branchName;
+    // const ecrRepositoryArn = `arn:aws:ecr:${region}:${account}:repository/yivi-issue-server-${branch}`;
 
 
-    new EcsFargateService(this, 'issue-service', {
-      serviceName: 'issue-service',
-      containerPort: 80,
-      ecsCluster: cluster,
-      listner: listner,
-      serviceListnerPath: '/*',
-      desiredtaskcount: 1,
-      useSpotInstances: true,
-      healthCheckPath: '/status',
-      repositoryArn: ecrRepositoryArn,
-    });
+    // new EcsFargateService(this, 'issue-service', {
+    //   serviceName: 'issue-service',
+    //   containerPort: 80,
+    //   ecsCluster: cluster,
+    //   listner: listner,
+    //   serviceListnerPath: '/*',
+    //   desiredtaskcount: 1,
+    //   useSpotInstances: true,
+    //   healthCheckPath: '/status',
+    //   repositoryArn: ecrRepositoryArn,
+    // });
   }
 
   createYiviKey() {
