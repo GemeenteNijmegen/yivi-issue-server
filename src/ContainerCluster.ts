@@ -29,7 +29,7 @@ export class ContainerClusterStack extends Stack {
     const listner = this.setupLoadbalancer(vpc, hostedzone);
     const cluster = this.constructEcsCluster(vpc);
     this.setupApiGateway(hostedzone, listner);
-    this.addHelloWorldService(cluster, listner);
+    this.addIssueService(cluster, listner, props);
   }
 
   setupVpc() {
@@ -138,10 +138,16 @@ export class ContainerClusterStack extends Stack {
     return listner;
   }
 
-  addHelloWorldService(cluster: ecs.Cluster, listner: loadbalancing.IApplicationListener) {
-    new EcsFargateService(this, 'service-1', {
-      serviceName: 'test',
-      containerImage: 'nginxdemos/hello',
+  addIssueService(cluster: ecs.Cluster, listner: loadbalancing.IApplicationListener, props: ContainerClusterStackProps) {
+
+    const region = props.configuration.deployFromEnvironment.region;
+    const account = props.configuration.deployFromEnvironment.account;
+    const branch = props.configuration.branchName;
+    const ecrRepositoryArn = `arn:aws:ecr:${region}:${account}:repository/yivi-issue-server-${branch}`;
+
+
+    new EcsFargateService(this, 'issue-service', {
+      serviceName: 'issue-service',
       containerPort: 80,
       ecsCluster: cluster,
       listner: listner,
@@ -149,6 +155,7 @@ export class ContainerClusterStack extends Stack {
       desiredtaskcount: 1,
       useSpotInstances: true,
       healthCheckPath: '/status',
+      repositoryArn: ecrRepositoryArn,
     });
   }
 

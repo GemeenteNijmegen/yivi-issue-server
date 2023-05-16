@@ -1,7 +1,7 @@
 import {
   aws_logs as logs,
   aws_ecs as ecs,
-  aws_secretsmanager as secrets,
+  aws_ecr as ecr,
   aws_elasticloadbalancingv2 as loadbalancing,
   Duration,
 } from 'aws-cdk-lib';
@@ -13,12 +13,6 @@ export interface EcsFargateServiceProps {
    * A service suffix is automatically added.
    */
   serviceName: string;
-
-  /**
-   * Provide a servet that contains the credentials
-   * key value pairs with username and password to a dockerhub account.
-   */
-  dockerhubSecret?: secrets.ISecret;
 
   /**
    * The ECS cluster to which to add this fargate service
@@ -34,11 +28,6 @@ export interface EcsFargateServiceProps {
    * Desired numer of tasks that should run in this service.
    */
   desiredtaskcount?: number;
-
-  /**
-   * The container image to use (e.g. on dockerhub)
-   */
-  containerImage: string;
 
   /**
    * Container listing port
@@ -62,6 +51,11 @@ export interface EcsFargateServiceProps {
    * Path the call on the container during health check
    */
   healthCheckPath: string;
+
+  /**
+   * ARN of the image's ECR repository
+   */
+  repositoryArn: string;
 }
 
 
@@ -116,7 +110,6 @@ export class EcsFargateService extends Construct {
         unhealthyThresholdCount: 6,
         timeout: Duration.seconds(10),
         interval: Duration.seconds(15),
-        // protocol: loa,
       },
     });
   }
@@ -146,10 +139,11 @@ export class EcsFargateService extends Construct {
       memoryMiB: '512',
     });
 
+
+    const ecrRepository = ecr.Repository.fromRepositoryArn(this, 'repository', props.repositoryArn);
+
     taskDef.addContainer(`${props.serviceName}-container`, {
-      image: ecs.ContainerImage.fromRegistry(props.containerImage, {
-        credentials: props.dockerhubSecret,
-      }),
+      image: ecs.ContainerImage.fromEcrRepository(ecrRepository),
       logging: new ecs.AwsLogDriver({
         streamPrefix: 'logs',
         logGroup: logGroup,
