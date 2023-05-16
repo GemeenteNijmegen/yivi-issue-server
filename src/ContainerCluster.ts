@@ -76,9 +76,11 @@ export class ContainerClusterStack extends Stack {
       },
     });
 
+    const albUrl = `https://alb.${hostedzone.zoneName}`
+    console.log('Seting up proxy for alb using url', albUrl)
     api.root.addProxy({
       anyMethod: true,
-      defaultIntegration: new apigateway.HttpIntegration(`alb.${hostedzone.zoneName}`, {
+      defaultIntegration: new apigateway.HttpIntegration(albUrl, {
         options: {
           requestParameters: {
             'integration.request.header.X-API-gateway-Access-Token': props.configuration.apiGatewayAlbSecurityToken,
