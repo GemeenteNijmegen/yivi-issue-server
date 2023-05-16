@@ -28,6 +28,7 @@ export class ApiStage extends Stage {
     const cluster = new ContainerClusterStack(this, 'cluster-stack', {
       env: props.configuration.deployToEnvironment,
       description: 'ecs cluster and services for yivi-issue-server',
+      configuration: props.configuration,
     });
     cluster.addDependency(parameterStack);
     cluster.addDependency(dnsStack);

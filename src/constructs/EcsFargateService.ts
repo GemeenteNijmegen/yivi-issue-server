@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import {
   aws_logs as logs,
   aws_ecs as ecs,
@@ -60,10 +59,10 @@ export interface EcsFargateServiceProps {
 
   /**
    * Set a token that must be send using the
-   * X-Cloudfront-Access-Token header from cloudfront to allow the
+   * X-API-gateway-Access-Token header from cloudfront to allow the
    * request to pass trough the loadbalancer.
    */
-  cloudfrontOnlyAccessToken?: string;
+  apiGatewayAccessToken?: string;
 
 }
 
@@ -104,8 +103,8 @@ export class EcsFargateService extends Construct {
     const conditions = [
       loadbalancing.ListenerCondition.pathPatterns([props.serviceListnerPath]),
     ];
-    if (props.cloudfrontOnlyAccessToken) {
-      conditions.push(loadbalancing.ListenerCondition.httpHeader('X-Cloudfront-Access-Token', [randomUUID()]));
+    if (props.apiGatewayAccessToken) {
+      conditions.push(loadbalancing.ListenerCondition.httpHeader('X-API-gateway-Access-Token', [props.apiGatewayAccessToken]));
     }
 
     props.listner.addTargets(`${props.serviceName}-target`, {

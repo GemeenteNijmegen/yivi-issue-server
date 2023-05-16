@@ -1,3 +1,4 @@
+import { randomUUID } from 'crypto';
 import { Environment } from 'aws-cdk-lib';
 import { Statics } from './Statics';
 
@@ -13,6 +14,7 @@ export interface Configuration {
   deployFromEnvironment: Environment;
   deployToEnvironment: Environment;
   sessionEndpointAllowList: string[];
+  apiGatewayAlbSecurityToken: string;
 }
 
 export const configurations: { [key: string]: Configuration } = {
@@ -26,6 +28,7 @@ export const configurations: { [key: string]: Configuration } = {
     sessionEndpointAllowList: [
       '', // TODO arn of issue lambda in Yivi issue app
     ],
+    apiGatewayAlbSecurityToken: randomUUID(), // By making this randomly the token rotates every deployment
   },
 };
 

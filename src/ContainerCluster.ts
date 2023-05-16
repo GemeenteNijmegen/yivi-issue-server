@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import {
   Stack, Fn, Aws, StackProps,
   aws_ecs as ecs,
@@ -13,12 +12,11 @@ import {
   aws_iam as iam,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
+import { Configurable } from './Configuration';
 import { EcsFargateService } from './constructs/EcsFargateService';
 import { Statics } from './Statics';
 
-export interface ContainerClusterStackProps extends StackProps {
-
-}
+export interface ContainerClusterStackProps extends StackProps, Configurable {}
 
 export class ContainerClusterStack extends Stack {
 
@@ -26,11 +24,11 @@ export class ContainerClusterStack extends Stack {
     super(scope, id, props);
 
     const hostedzone = this.importHostedZone();
-    this.setupApiGateway(hostedzone);
+    this.setupApiGateway(hostedzone, props);
     const vpc = this.setupVpc();
-    this.setupLoadbalancer(vpc, hostedzone);
-    this.constructEcsCluster(vpc);
-    //this.addHelloWorldService(cluster, listner);
+    const listner = this.setupLoadbalancer(vpc, hostedzone);
+    const cluster = this.constructEcsCluster(vpc);
+    this.addHelloWorldService(cluster, listner, props);
   }
 
   setupVpc() {
@@ -64,7 +62,7 @@ export class ContainerClusterStack extends Stack {
     });
   }
 
-  setupApiGateway(hostedzone: route53.IHostedZone) {
+  setupApiGateway(hostedzone: route53.IHostedZone, props: ContainerClusterStackProps) {
 
     const cert = new acm.Certificate(this, 'api-cert', {
       domainName: hostedzone.zoneName,
@@ -78,8 +76,16 @@ export class ContainerClusterStack extends Stack {
       },
     });
 
-    // Temp method to test integration
-    api.root.addMethod('GET', new apigateway.HttpIntegration('https://nijmegen.nl'));
+    api.root.addProxy({
+      anyMethod: true,
+      defaultIntegration: new apigateway.HttpIntegration(`alb.${hostedzone.zoneName}`, {
+        options: {
+          requestParameters: {
+            'integration.request.header.X-API-gateway-Access-Token': props.configuration.apiGatewayAlbSecurityToken,
+          },
+        },
+      }),
+    });
 
     return api;
   }
@@ -133,8 +139,7 @@ export class ContainerClusterStack extends Stack {
     return listner;
   }
 
-
-  addHelloWorldService(cluster: ecs.Cluster, listner: loadbalancing.IApplicationListener) {
+  addHelloWorldService(cluster: ecs.Cluster, listner: loadbalancing.IApplicationListener, props: ContainerClusterStackProps) {
     new EcsFargateService(this, 'service-1', {
       serviceName: 'test',
       containerImage: 'nginxdemos/hello',
@@ -144,7 +149,7 @@ export class ContainerClusterStack extends Stack {
       serviceListnerPath: '/*',
       desiredtaskcount: 1,
       useSpotInstances: true,
-      cloudfrontOnlyAccessToken: randomUUID(),
+      apiGatewayAccessToken: props.configuration.apiGatewayAlbSecurityToken,
     });
   }
 
