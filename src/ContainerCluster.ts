@@ -29,7 +29,7 @@ export class ContainerClusterStack extends Stack {
     const listner = this.setupLoadbalancer(vpc, hostedzone);
     const cluster = this.constructEcsCluster(vpc);
     this.setupApiGateway(hostedzone, listner);
-    this.addHelloWorldService(cluster, listner, props);
+    this.addHelloWorldService(cluster, listner);
   }
 
   setupVpc() {
@@ -138,7 +138,7 @@ export class ContainerClusterStack extends Stack {
     return listner;
   }
 
-  addHelloWorldService(cluster: ecs.Cluster, listner: loadbalancing.IApplicationListener, props: ContainerClusterStackProps) {
+  addHelloWorldService(cluster: ecs.Cluster, listner: loadbalancing.IApplicationListener) {
     new EcsFargateService(this, 'service-1', {
       serviceName: 'test',
       containerImage: 'nginxdemos/hello',
@@ -148,7 +148,6 @@ export class ContainerClusterStack extends Stack {
       serviceListnerPath: '/*',
       desiredtaskcount: 1,
       useSpotInstances: true,
-      apiGatewayAccessToken: props.configuration.apiGatewayAlbSecurityToken,
     });
   }
 

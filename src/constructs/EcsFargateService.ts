@@ -57,13 +57,6 @@ export interface EcsFargateServiceProps {
    */
   useSpotInstances?: boolean;
 
-  /**
-   * Set a token that must be send using the
-   * X-API-gateway-Access-Token header from cloudfront to allow the
-   * request to pass trough the loadbalancer.
-   */
-  apiGatewayAccessToken?: string;
-
 }
 
 
@@ -103,9 +96,6 @@ export class EcsFargateService extends Construct {
     const conditions = [
       loadbalancing.ListenerCondition.pathPatterns([props.serviceListnerPath]),
     ];
-    if (props.apiGatewayAccessToken) {
-      conditions.push(loadbalancing.ListenerCondition.httpHeader('X-API-gateway-Access-Token', [props.apiGatewayAccessToken]));
-    }
 
     props.listner.addTargets(`${props.serviceName}-target`, {
       port: props.containerPort,
