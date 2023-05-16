@@ -1,3 +1,5 @@
+import * as apigatewayv2 from '@aws-cdk/aws-apigatewayv2-alpha';
+import * as apigatewayv2Integrations from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
 import {
   Stack, Fn, Aws, StackProps,
   aws_ecs as ecs,
@@ -10,8 +12,6 @@ import {
   aws_kms as kms,
   aws_iam as iam,
 } from 'aws-cdk-lib';
-import * as apigatewayv2 from '@aws-cdk/aws-apigatewayv2-alpha';
-import * as apigatewayv2Integrations from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
 import { EcsFargateService } from './constructs/EcsFargateService';
@@ -84,7 +84,7 @@ export class ContainerClusterStack extends Stack {
 
     api.addRoutes({
       path: '/',
-      integration: new apigatewayv2Integrations.HttpAlbIntegration('api-integration', listner);
+      integration: new apigatewayv2Integrations.HttpAlbIntegration('api-integration', listner),
     });
 
     return api;
