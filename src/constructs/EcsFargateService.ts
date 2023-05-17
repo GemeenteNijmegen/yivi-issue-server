@@ -5,6 +5,7 @@ import {
   aws_elasticloadbalancingv2 as loadbalancing,
   Duration,
 } from 'aws-cdk-lib';
+import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 
 export interface EcsFargateServiceProps {
@@ -139,7 +140,6 @@ export class EcsFargateService extends Construct {
       memoryMiB: '512',
     });
 
-
     const ecrRepository = ecr.Repository.fromRepositoryArn(this, 'repository', props.repositoryArn);
 
     taskDef.addContainer(`${props.serviceName}-container`, {
@@ -172,6 +172,9 @@ export class EcsFargateService extends Construct {
           weight: 1,
         },
       ],
+      vpcSubnets: {
+        subnetType: SubnetType.PUBLIC,
+      }
     });
     service.node.addDependency(props.ecsCluster);
     return service;
