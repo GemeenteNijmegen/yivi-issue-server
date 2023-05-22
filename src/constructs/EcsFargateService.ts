@@ -1,7 +1,7 @@
 import {
   aws_logs as logs,
   aws_ecs as ecs,
-  aws_ecr as ecr,
+  aws_secretsmanager as secrets,
   aws_elasticloadbalancingv2 as loadbalancing,
   Duration,
 } from 'aws-cdk-lib';
@@ -14,6 +14,12 @@ export interface EcsFargateServiceProps {
    * A service suffix is automatically added.
    */
   serviceName: string;
+
+  /**
+   * Provide a servet that contains the credentials
+   * key value pairs with username and password to a dockerhub account.
+   */
+  dockerhubSecret?: secrets.ISecret;
 
   /**
    * The ECS cluster to which to add this fargate service
@@ -29,6 +35,11 @@ export interface EcsFargateServiceProps {
    * Desired numer of tasks that should run in this service.
    */
   desiredtaskcount?: number;
+
+  /**
+   * The container image to use (e.g. on dockerhub)
+   */
+  containerImage: string;
 
   /**
    * Container listing port
@@ -140,10 +151,13 @@ export class EcsFargateService extends Construct {
       memoryMiB: '512',
     });
 
-    const ecrRepository = ecr.Repository.fromRepositoryArn(this, 'repository', props.repositoryArn);
+    // const ecrRepository = ecr.Repository.fromRepositoryArn(this, 'repository', props.repositoryArn);
 
     taskDef.addContainer(`${props.serviceName}-container`, {
-      image: ecs.ContainerImage.fromEcrRepository(ecrRepository),
+      //image: ecs.ContainerImage.fromEcrRepository(ecrRepository),
+      image: ecs.ContainerImage.fromRegistry(props.containerImage, {
+        credentials: props.dockerhubSecret,
+      }),
       logging: new ecs.AwsLogDriver({
         streamPrefix: 'logs',
         logGroup: logGroup,
@@ -174,7 +188,7 @@ export class EcsFargateService extends Construct {
       ],
       vpcSubnets: {
         subnetType: SubnetType.PUBLIC,
-      }
+      },
     });
     service.node.addDependency(props.ecsCluster);
     return service;
