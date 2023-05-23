@@ -27,9 +27,10 @@ export class ContainerClusterStack extends Stack {
     const hostedzone = this.importHostedZone();
     const vpc = this.setupVpc();
     const listner = this.setupLoadbalancer(vpc, hostedzone);
-    const cluster = this.constructEcsCluster(vpc);
+    this.constructEcsCluster(vpc);
     this.setupApiGateway(hostedzone, listner);
-    this.addIssueService(cluster, listner, props);
+    //this.addIssueService(cluster, listner, props);
+    this.setupEc2Instance(vpc);
   }
 
   setupVpc() {
@@ -212,5 +213,19 @@ export class ContainerClusterStack extends Stack {
 
   }
 
+  setupEc2Instance(vpc: ec2.IVpc) {
+    const instance = new ec2.Instance(this, 'ec2-test-instance', {
+      vpc,
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.T2, ec2.InstanceSize.MICRO),
+      machineImage: ec2.MachineImage.genericLinux({
+        'eu-central-1': 'ami-0452d2386670510e8', // Amazon linux 2023 AMI (ARM)
+      }),
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+      },
+    });
+
+    instance.role.addManagedPolicy(iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonSSMManagedInstanceCore'));
+  }
 
 }
