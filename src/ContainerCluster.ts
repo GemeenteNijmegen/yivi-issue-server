@@ -88,6 +88,12 @@ export class ContainerClusterStack extends Stack {
       integration: new apigatewayv2Integrations.HttpAlbIntegration('api-integration', listner),
     });
 
+    const alias = new route53Targets.ApiGatewayv2DomainProperties(domainname.regionalDomainName, domainname.regionalHostedZoneId);
+    new route53.ARecord(this, 'api-a-record', {
+      zone: hostedzone,
+      target: route53.RecordTarget.fromAlias(alias),
+    });
+
     return api;
   }
 
