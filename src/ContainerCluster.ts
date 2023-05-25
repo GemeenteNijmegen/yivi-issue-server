@@ -27,9 +27,9 @@ export class ContainerClusterStack extends Stack {
     const hostedzone = this.importHostedZone();
     const vpc = this.setupVpc();
     const listner = this.setupLoadbalancer(vpc, hostedzone);
-    this.constructEcsCluster(vpc);
+    const cluster = this.constructEcsCluster(vpc);
     this.setupApiGateway(hostedzone, listner);
-    //this.addIssueService(cluster, listner, props);
+    this.addIssueService(cluster, listner, props);
     this.setupEc2Instance(vpc);
   }
 
