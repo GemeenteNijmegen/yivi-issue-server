@@ -30,7 +30,7 @@ export class ContainerClusterStack extends Stack {
     const cluster = this.constructEcsCluster(vpc);
     this.setupApiGateway(hostedzone, listner);
     this.addIssueService(cluster, listner, props);
-    this.setupEc2Instance(vpc);
+    //this.setupEc2Instance(vpc);
   }
 
   setupVpc() {
