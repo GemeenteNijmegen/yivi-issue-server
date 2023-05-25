@@ -28,9 +28,8 @@ export class ContainerClusterStack extends Stack {
     const vpc = this.setupVpc();
     const listner = this.setupLoadbalancer(vpc, hostedzone);
     const cluster = this.constructEcsCluster(vpc);
-    this.setupApiGateway(hostedzone, listner);
+    this.setupApiGateway(hostedzone, listner, vpc);
     this.addIssueService(cluster, listner, props);
-    //this.setupEc2Instance(vpc);
   }
 
   setupVpc() {
@@ -64,7 +63,7 @@ export class ContainerClusterStack extends Stack {
     });
   }
 
-  setupApiGateway(hostedzone: route53.IHostedZone, listner: loadbalancing.ApplicationListener) {
+  setupApiGateway(hostedzone: route53.IHostedZone, listner: loadbalancing.ApplicationListener, vpc: ec2.IVpc) {
 
     const cert = new acm.Certificate(this, 'api-cert', {
       domainName: hostedzone.zoneName,
@@ -83,9 +82,16 @@ export class ContainerClusterStack extends Stack {
       },
     });
 
+    const vpcLink = new apigatewayv2.VpcLink(this, 'vpc-link', {
+      vpc: vpc,
+    });
+
     api.addRoutes({
-      path: '/',
-      integration: new apigatewayv2Integrations.HttpAlbIntegration('api-integration', listner),
+      path: '/irma',
+      methods: [apigatewayv2.HttpMethod.ANY],
+      integration: new apigatewayv2Integrations.HttpAlbIntegration('api-integration', listner, {
+        vpcLink: vpcLink,
+      }),
     });
 
     const alias = new route53Targets.ApiGatewayv2DomainProperties(domainname.regionalDomainName, domainname.regionalHostedZoneId);
@@ -132,13 +138,6 @@ export class ContainerClusterStack extends Stack {
       protocol: loadbalancing.ApplicationProtocol.HTTPS,
       sslPolicy: loadbalancing.SslPolicy.FORWARD_SECRECY_TLS12_RES,
       defaultAction: loadbalancing.ListenerAction.fixedResponse(404, { messageBody: 'not found ALB' }),
-    });
-
-    new route53.ARecord(this, 'loadbalancer-a-record', {
-      zone: hostedzone,
-      recordName: 'alb',
-      target: route53.RecordTarget.fromAlias(new route53Targets.LoadBalancerTarget(loadbalancer)),
-      comment: 'ALB A record for yivi issue server',
     });
 
     vpc.node.addDependency(loadbalancer);
