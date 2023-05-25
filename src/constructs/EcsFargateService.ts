@@ -187,7 +187,7 @@ export class EcsFargateService extends Construct {
         },
       ],
       vpcSubnets: {
-        subnetType: SubnetType.PUBLIC,
+        subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
     });
     service.node.addDependency(props.ecsCluster);
