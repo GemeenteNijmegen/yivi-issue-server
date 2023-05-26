@@ -10,6 +10,7 @@ import {
   aws_route53_targets as route53Targets,
   aws_certificatemanager as acm,
   aws_kms as kms,
+  aws_servicediscovery as servicediscovery,
   aws_iam as iam,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
@@ -26,10 +27,11 @@ export class ContainerClusterStack extends Stack {
 
     const hostedzone = this.importHostedZone();
     const vpc = this.setupVpc();
-    const listner = this.setupLoadbalancer(vpc, hostedzone);
+    const namespace = this.setupCloudMap(vpc);
     const cluster = this.constructEcsCluster(vpc);
-    this.setupApiGateway(hostedzone, listner, vpc);
-    this.addIssueService(cluster, listner, props);
+    const vpcLink = new apigatewayv2.VpcLink(this, 'vpc-link', { vpc });
+    const api = this.setupApiGateway(hostedzone);
+    this.addIssueService(cluster, namespace, api, vpcLink);
   }
 
   setupVpc() {
@@ -63,7 +65,14 @@ export class ContainerClusterStack extends Stack {
     });
   }
 
-  setupApiGateway(hostedzone: route53.IHostedZone, listner: loadbalancing.ApplicationListener, vpc: ec2.IVpc) {
+  setupCloudMap(vpc: ec2.IVpc) {
+    return new servicediscovery.PrivateDnsNamespace(this, 'cloud-map', {
+      name: 'yivi-issue.local',
+      vpc,
+    });
+  }
+
+  setupApiGateway(hostedzone: route53.IHostedZone) {
 
     const cert = new acm.Certificate(this, 'api-cert', {
       domainName: hostedzone.zoneName,
@@ -82,18 +91,6 @@ export class ContainerClusterStack extends Stack {
       },
     });
 
-    const vpcLink = new apigatewayv2.VpcLink(this, 'vpc-link', {
-      vpc: vpc,
-    });
-
-    api.addRoutes({
-      path: '/irma',
-      methods: [apigatewayv2.HttpMethod.ANY],
-      integration: new apigatewayv2Integrations.HttpAlbIntegration('api-integration', listner, {
-        vpcLink: vpcLink,
-      }),
-    });
-
     const alias = new route53Targets.ApiGatewayv2DomainProperties(domainname.regionalDomainName, domainname.regionalHostedZoneId);
     new route53.ARecord(this, 'api-a-record', {
       zone: hostedzone,
@@ -110,6 +107,7 @@ export class ContainerClusterStack extends Stack {
       clusterName: 'yivi-issue-cluster',
       enableFargateCapacityProviders: true, // Allows usage of spot instances
     });
+
 
     vpc.node.addDependency(cluster);
 
@@ -144,25 +142,44 @@ export class ContainerClusterStack extends Stack {
     return listner;
   }
 
-  addIssueService(cluster: ecs.Cluster, listner: loadbalancing.IApplicationListener, _props: ContainerClusterStackProps) {
+  addIssueService(
+    cluster: ecs.Cluster,
+    cloudMapNamespace: servicediscovery.INamespace,
+    api: apigatewayv2.HttpApi,
+    vpcLink: apigatewayv2.VpcLink,
+  ) {
 
     // const region = props.configuration.deployFromEnvironment.region;
     // const account = props.configuration.deployFromEnvironment.account;
     // const branch = props.configuration.branchName;
     // const ecrRepositoryArn = `arn:aws:ecr:${region}:${account}:repository/yivi-issue-server-${branch}`;
 
-    new EcsFargateService(this, 'issue-service', {
+    const service = new EcsFargateService(this, 'issue-service', {
       serviceName: 'yivi-issue',
       containerImage: 'nginxdemos/hello',
       repositoryArn: '',
       containerPort: 80,
       ecsCluster: cluster,
-      listner: listner,
+      //listner: listner,
       serviceListnerPath: '/*',
       desiredtaskcount: 1,
       useSpotInstances: true,
       healthCheckPath: '/status',
+      cloudMapNamespace,
     });
+
+    if (!service.service.cloudMapService) {
+      throw Error('Cannot create path in API for yivi-issue-service (ECS) as cloudmapService is undefined');
+    }
+
+    api.addRoutes({
+      path: '/irma',
+      methods: [apigatewayv2.HttpMethod.ANY],
+      integration: new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', service.service.cloudMapService, {
+        vpcLink: vpcLink,
+      }),
+    });
+
   }
 
   createYiviKey() {

@@ -2,10 +2,9 @@ import {
   aws_logs as logs,
   aws_ecs as ecs,
   aws_secretsmanager as secrets,
-  aws_elasticloadbalancingv2 as loadbalancing,
-  Duration,
 } from 'aws-cdk-lib';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { INamespace } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
 export interface EcsFargateServiceProps {
@@ -29,7 +28,7 @@ export interface EcsFargateServiceProps {
   /**
    * The loadbalancer listner to which to connect this service
    */
-  listner: loadbalancing.IApplicationListener;
+  //listner: loadbalancing.IApplicationListener;
 
   /**
    * Desired numer of tasks that should run in this service.
@@ -68,6 +67,11 @@ export interface EcsFargateServiceProps {
    * ARN of the image's ECR repository
    */
   repositoryArn: string;
+
+  /**
+   * The CloudMap namespace to make this container known in
+   */
+  cloudMapNamespace: INamespace;
 }
 
 
@@ -81,6 +85,7 @@ export interface EcsFargateServiceProps {
 export class EcsFargateService extends Construct {
 
   readonly logGroupArn: string;
+  readonly service: ecs.FargateService;
 
   constructor(scope: Construct, id: string, props: EcsFargateServiceProps) {
     super(scope, id);
@@ -91,8 +96,7 @@ export class EcsFargateService extends Construct {
 
     // Task, service and expose to loadbalancer
     const task = this.setupTaskDefinition(logGroup, props);
-    const service = this.setupFargateService(task, props);
-    this.setupLoadbalancerTarget(service, props);
+    this.service = this.setupFargateService(task, props);
 
   }
 
@@ -102,28 +106,28 @@ export class EcsFargateService extends Construct {
    * @param service
    * @param props
    */
-  private setupLoadbalancerTarget(service: ecs.FargateService, props: EcsFargateServiceProps) {
+  setupLoadbalancerTarget(_service: ecs.FargateService, _props: EcsFargateServiceProps) {
 
-    const conditions = [
-      loadbalancing.ListenerCondition.pathPatterns([props.serviceListnerPath]),
-    ];
+    // const conditions = [
+    //   loadbalancing.ListenerCondition.pathPatterns([props.serviceListnerPath]),
+    // ];
 
-    props.listner.addTargets(`${props.serviceName}-target`, {
-      port: props.containerPort,
-      protocol: loadbalancing.ApplicationProtocol.HTTP,
-      targets: [service],
-      conditions,
-      priority: 10,
-      healthCheck: {
-        enabled: true,
-        path: props.healthCheckPath,
-        healthyHttpCodes: '200',
-        healthyThresholdCount: 2,
-        unhealthyThresholdCount: 6,
-        timeout: Duration.seconds(10),
-        interval: Duration.seconds(15),
-      },
-    });
+    // props.listner.addTargets(`${props.serviceName}-target`, {
+    //   port: props.containerPort,
+    //   protocol: loadbalancing.ApplicationProtocol.HTTP,
+    //   targets: [service],
+    //   conditions,
+    //   priority: 10,
+    //   healthCheck: {
+    //     enabled: true,
+    //     path: props.healthCheckPath,
+    //     healthyHttpCodes: '200',
+    //     healthyThresholdCount: 2,
+    //     unhealthyThresholdCount: 6,
+    //     timeout: Duration.seconds(10),
+    //     interval: Duration.seconds(15),
+    //   },
+    // });
   }
 
 
@@ -188,6 +192,11 @@ export class EcsFargateService extends Construct {
       ],
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+      },
+      cloudMapOptions: {
+        cloudMapNamespace: props.cloudMapNamespace,
+        containerPort: 80,
+        name: `${props.serviceName}-service`,
       },
     });
     service.node.addDependency(props.ecsCluster);
