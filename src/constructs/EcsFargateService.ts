@@ -169,6 +169,7 @@ export class EcsFargateService extends Construct {
       portMappings: [{
         containerPort: props.containerPort,
       }],
+      readonlyRootFilesystem: true,
     });
     return taskDef;
   }
