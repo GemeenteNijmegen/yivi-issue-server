@@ -148,7 +148,7 @@ export class ContainerClusterStack extends Stack {
     // Construct the loadbalancer
     const loadbalancer = new loadbalancing.ApplicationLoadBalancer(this, 'loadbalancer', {
       vpc,
-      internetFacing: true,
+      internetFacing: false,
       dropInvalidHeaderFields: true,
     });
 
