@@ -117,6 +117,11 @@ export class ContainerClusterStack extends Stack {
         protocol: '$context.protocol',
         responseLength: '$context.responseLength',
         domainName: '$context.domainName',
+        errorMessage: '$context.error.message',
+        errorType: '$context.error.responseType',
+        integrationError: '$context.integration.error',
+        integrationStatus: '$context.integration.status',
+        stage: '$context.stage',
       }),
     };
 
