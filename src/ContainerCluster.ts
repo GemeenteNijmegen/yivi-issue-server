@@ -14,7 +14,6 @@ import {
   aws_iam as iam,
   aws_apigatewayv2 as cdkApigatewayV2,
   aws_logs as logs,
-  Duration,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
@@ -30,11 +29,10 @@ export class ContainerClusterStack extends Stack {
 
     const hostedzone = this.importHostedZone();
     const vpc = this.setupVpc();
-    const namespace = this.setupCloudMap(vpc);
+    const listner = this.setupLoadbalancer(vpc, hostedzone);
     const cluster =this.constructEcsCluster(vpc);
-    const vpcLink = new apigatewayv2.VpcLink(this, 'vpc-link', { vpc });
     const api = this.setupApiGateway(hostedzone);
-    this.addIssueService(cluster, namespace, api, vpcLink);
+    this.addIssueService(cluster, listner, api);
   }
 
   setupVpc() {
@@ -168,9 +166,8 @@ export class ContainerClusterStack extends Stack {
 
   addIssueService(
     cluster: ecs.Cluster,
-    cloudMapNamespace: servicediscovery.PrivateDnsNamespace,
+    listner: loadbalancing.ApplicationListener,
     api: apigatewayv2.HttpApi,
-    vpcLink: apigatewayv2.VpcLink,
   ) {
 
     // const region = props.configuration.deployFromEnvironment.region;
@@ -178,36 +175,23 @@ export class ContainerClusterStack extends Stack {
     // const branch = props.configuration.branchName;
     // const ecrRepositoryArn = `arn:aws:ecr:${region}:${account}:repository/yivi-issue-server-${branch}`;
 
-    const cloudMapService = cloudMapNamespace.createService('yivi-issue-service', {
-      description: 'CloudMap Service for yivi-issue-service',
-      dnsTtl: Duration.seconds(10),
-      name: 'yivi-issue-service',
-    });
-
     new EcsFargateService(this, 'issue-service', {
       serviceName: 'yivi-issue',
       containerImage: 'nginxdemos/hello',
       repositoryArn: '',
       containerPort: 80,
       ecsCluster: cluster,
-      serviceListnerPath: '/*',
+      listner: listner,
+      serviceListnerPath: '/irma',
       desiredtaskcount: 1,
       useSpotInstances: true,
       healthCheckPath: '/status',
-      cloudMapService,
     });
-
-
-    // if (!service.service.cloudMapService) {
-    //   throw Error('Cannot create path in API for yivi-issue-service (ECS) as cloudmapService is undefined');
-    // }
 
     api.addRoutes({
       path: '/irma',
       methods: [apigatewayv2.HttpMethod.ANY],
-      integration: new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', cloudMapService, {
-        vpcLink: vpcLink,
-      }),
+      integration: new apigatewayv2Integrations.HttpAlbIntegration('api-integration', listner),
     });
 
   }
