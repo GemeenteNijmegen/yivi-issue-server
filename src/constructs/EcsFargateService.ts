@@ -2,6 +2,7 @@ import {
   aws_logs as logs,
   aws_ecs as ecs,
   aws_secretsmanager as secrets,
+  Duration,
 } from 'aws-cdk-lib';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { INamespace } from 'aws-cdk-lib/aws-servicediscovery';
@@ -169,7 +170,7 @@ export class EcsFargateService extends Construct {
       portMappings: [{
         containerPort: props.containerPort,
       }],
-      readonlyRootFilesystem: true,
+      readonlyRootFilesystem: false,
     });
     return taskDef;
   }
@@ -198,6 +199,7 @@ export class EcsFargateService extends Construct {
         cloudMapNamespace: props.cloudMapNamespace,
         containerPort: 80,
         name: `${props.serviceName}-service`,
+        dnsTtl: Duration.seconds(10),
       },
     });
     service.node.addDependency(props.ecsCluster);
