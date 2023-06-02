@@ -3,7 +3,6 @@ import {
   aws_ecs as ecs,
   aws_secretsmanager as secrets,
   aws_elasticloadbalancingv2 as loadbalancing,
-  Duration,
 } from 'aws-cdk-lib';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
@@ -121,11 +120,11 @@ export class EcsFargateService extends Construct {
       healthCheck: {
         enabled: true,
         path: props.healthCheckPath,
-        healthyHttpCodes: '200',
-        healthyThresholdCount: 2,
-        unhealthyThresholdCount: 6,
-        timeout: Duration.seconds(10),
-        interval: Duration.seconds(15),
+        // healthyHttpCodes: '200',
+        // healthyThresholdCount: 2,
+        // unhealthyThresholdCount: 6,
+        // timeout: Duration.seconds(10),
+        // interval: Duration.seconds(15),
       },
     });
   }

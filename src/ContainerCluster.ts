@@ -148,9 +148,9 @@ export class ContainerClusterStack extends Stack {
     // Construct the loadbalancer
     const loadbalancer = new loadbalancing.ApplicationLoadBalancer(this, 'loadbalancer', {
       vpc,
+      internetFacing: true,
+      dropInvalidHeaderFields: true,
     });
-    // Security hub finding, do not accept invalid http headers
-    loadbalancer.setAttribute('routing.http.drop_invalid_header_fields.enabled', 'true');
 
     // Setup a https listner
     const listner = loadbalancer.addListener('https', {
