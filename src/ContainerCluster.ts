@@ -14,6 +14,7 @@ import {
   aws_iam as iam,
   aws_apigatewayv2 as cdkApigatewayV2,
   aws_logs as logs,
+  Duration,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
@@ -93,7 +94,9 @@ export class ContainerClusterStack extends Stack {
       },
     });
 
-    const accessLogging = new logs.LogGroup(this, 'api-logging');
+    const accessLogging = new logs.LogGroup(this, 'api-logging', {
+      retention: logs.RetentionDays.ONE_WEEK, // Very short lived as we'll be using a WAF
+    });
     const defaultStage = api.defaultStage?.node.defaultChild as cdkApigatewayV2.CfnStage;
     defaultStage.accessLogSettings = {
       destinationArn: accessLogging.logGroupArn,
@@ -165,7 +168,7 @@ export class ContainerClusterStack extends Stack {
 
   addIssueService(
     cluster: ecs.Cluster,
-    cloudMapNamespace: servicediscovery.INamespace,
+    cloudMapNamespace: servicediscovery.PrivateDnsNamespace,
     api: apigatewayv2.HttpApi,
     vpcLink: apigatewayv2.VpcLink,
   ) {
@@ -175,7 +178,13 @@ export class ContainerClusterStack extends Stack {
     // const branch = props.configuration.branchName;
     // const ecrRepositoryArn = `arn:aws:ecr:${region}:${account}:repository/yivi-issue-server-${branch}`;
 
-    const service = new EcsFargateService(this, 'issue-service', {
+    const cloudMapService = cloudMapNamespace.createService('yivi-issue-service', {
+      description: 'CloudMap Service for yivi-issue-service',
+      dnsTtl: Duration.seconds(10),
+      name: 'yivi-issue-service',
+    });
+
+    new EcsFargateService(this, 'issue-service', {
       serviceName: 'yivi-issue',
       containerImage: 'nginxdemos/hello',
       repositoryArn: '',
@@ -185,17 +194,18 @@ export class ContainerClusterStack extends Stack {
       desiredtaskcount: 1,
       useSpotInstances: true,
       healthCheckPath: '/status',
-      cloudMapNamespace,
+      cloudMapService,
     });
 
-    if (!service.service.cloudMapService) {
-      throw Error('Cannot create path in API for yivi-issue-service (ECS) as cloudmapService is undefined');
-    }
+
+    // if (!service.service.cloudMapService) {
+    //   throw Error('Cannot create path in API for yivi-issue-service (ECS) as cloudmapService is undefined');
+    // }
 
     api.addRoutes({
       path: '/irma',
       methods: [apigatewayv2.HttpMethod.ANY],
-      integration: new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', service.service.cloudMapService, {
+      integration: new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', cloudMapService, {
         vpcLink: vpcLink,
       }),
     });

@@ -2,10 +2,9 @@ import {
   aws_logs as logs,
   aws_ecs as ecs,
   aws_secretsmanager as secrets,
-  Duration,
 } from 'aws-cdk-lib';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
-import { INamespace } from 'aws-cdk-lib/aws-servicediscovery';
+import { IService } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
 export interface EcsFargateServiceProps {
@@ -72,7 +71,7 @@ export interface EcsFargateServiceProps {
   /**
    * The CloudMap namespace to make this container known in
    */
-  cloudMapNamespace: INamespace;
+  cloudMapService: IService;
 }
 
 
@@ -195,13 +194,19 @@ export class EcsFargateService extends Construct {
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
-      cloudMapOptions: {
-        cloudMapNamespace: props.cloudMapNamespace,
-        containerPort: 80,
-        name: `${props.serviceName}-service`,
-        dnsTtl: Duration.seconds(10),
-      },
+      // cloudMapOptions: {
+      //   cloudMapNamespace: props.cloudMapNamespace,
+      //   containerPort: 80,
+      //   name: `${props.serviceName}-service`,
+      //   dnsTtl: Duration.seconds(10),
+      // },
     });
+    
+    
+    service.associateCloudMapService({
+      service: props.cloudMapService,
+    })
+
     service.node.addDependency(props.ecsCluster);
     return service;
   }
