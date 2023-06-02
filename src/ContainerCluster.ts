@@ -12,6 +12,8 @@ import {
   aws_kms as kms,
   aws_servicediscovery as servicediscovery,
   aws_iam as iam,
+  aws_apigatewayv2 as cdkApigatewayV2,
+  aws_logs as logs,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
@@ -90,6 +92,25 @@ export class ContainerClusterStack extends Stack {
         domainName: domainname,
       },
     });
+
+    const accessLogging = new logs.LogGroup(this, 'api-logging');
+    const defaultStage = api.defaultStage?.node.defaultChild as cdkApigatewayV2.CfnStage;
+    defaultStage.accessLogSettings = {
+      destinationArn: accessLogging.logGroupArn,
+      format: JSON.stringify({
+        requestId: '$context.requestId',
+        userAgent: '$context.identity.userAgent',
+        sourceIp: '$context.identity.sourceIp',
+        requestTime: '$context.requestTime',
+        requestTimeEpoch: '$context.requestTimeEpoch',
+        httpMethod: '$context.httpMethod',
+        path: '$context.path',
+        status: '$context.status',
+        protocol: '$context.protocol',
+        responseLength: '$context.responseLength',
+        domainName: '$context.domainName',
+      }),
+    };
 
     const alias = new route53Targets.ApiGatewayv2DomainProperties(domainname.regionalDomainName, domainname.regionalHostedZoneId);
     new route53.ARecord(this, 'api-a-record', {
