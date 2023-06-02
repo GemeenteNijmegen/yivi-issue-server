@@ -27,11 +27,11 @@ export class ContainerClusterStack extends Stack {
 
     const hostedzone = this.importHostedZone();
     const vpc = this.setupVpc();
-    this.setupCloudMap(vpc);
-    this.constructEcsCluster(vpc);
-    new apigatewayv2.VpcLink(this, 'vpc-link', { vpc });
-    this.setupApiGateway(hostedzone);
-    //this.addIssueService(cluster, namespace, api, vpcLink);
+    const namespace = this.setupCloudMap(vpc);
+    const cluster =this.constructEcsCluster(vpc);
+    const vpcLink = new apigatewayv2.VpcLink(this, 'vpc-link', { vpc });
+    const api = this.setupApiGateway(hostedzone);
+    this.addIssueService(cluster, namespace, api, vpcLink);
   }
 
   setupVpc() {
@@ -160,7 +160,6 @@ export class ContainerClusterStack extends Stack {
       repositoryArn: '',
       containerPort: 80,
       ecsCluster: cluster,
-      //listner: listner,
       serviceListnerPath: '/*',
       desiredtaskcount: 1,
       useSpotInstances: true,
