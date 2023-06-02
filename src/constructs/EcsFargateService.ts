@@ -2,9 +2,9 @@ import {
   aws_logs as logs,
   aws_ecs as ecs,
   aws_secretsmanager as secrets,
-  aws_elasticloadbalancingv2 as loadbalancing,
 } from 'aws-cdk-lib';
 import { SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { IService } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
 export interface EcsFargateServiceProps {
@@ -68,7 +68,9 @@ export interface EcsFargateServiceProps {
    */
   repositoryArn: string;
 
-  listner: loadbalancing.ApplicationListener;
+  // listner: loadbalancing.ApplicationListener;
+
+  cloudMapsService: IService;
 }
 
 
@@ -95,7 +97,7 @@ export class EcsFargateService extends Construct {
     const task = this.setupTaskDefinition(logGroup, props);
     this.service = this.setupFargateService(task, props);
 
-    this.setupLoadbalancerTarget(this.service, props);
+    //this.setupLoadbalancerTarget(this.service, props);
 
   }
 
@@ -105,28 +107,28 @@ export class EcsFargateService extends Construct {
    * @param service
    * @param props
    */
-  setupLoadbalancerTarget(service: ecs.FargateService, props: EcsFargateServiceProps) {
+  setupLoadbalancerTarget(_service: ecs.FargateService, _props: EcsFargateServiceProps) {
 
-    const conditions = [
-      loadbalancing.ListenerCondition.pathPatterns([props.serviceListnerPath]),
-    ];
+    // const conditions = [
+    //   loadbalancing.ListenerCondition.pathPatterns([props.serviceListnerPath]),
+    // ];
 
-    props.listner.addTargets(`${props.serviceName}-target`, {
-      port: props.containerPort,
-      protocol: loadbalancing.ApplicationProtocol.HTTP,
-      targets: [service],
-      conditions,
-      priority: 10,
-      healthCheck: {
-        enabled: true,
-        path: props.healthCheckPath,
-        // healthyHttpCodes: '200',
-        // healthyThresholdCount: 2,
-        // unhealthyThresholdCount: 6,
-        // timeout: Duration.seconds(10),
-        // interval: Duration.seconds(15),
-      },
-    });
+    // props.listner.addTargets(`${props.serviceName}-target`, {
+    //   port: props.containerPort,
+    //   protocol: loadbalancing.ApplicationProtocol.HTTP,
+    //   targets: [service],
+    //   conditions,
+    //   priority: 10,
+    //   healthCheck: {
+    //     enabled: true,
+    //     path: props.healthCheckPath,
+    //     // healthyHttpCodes: '200',
+    //     // healthyThresholdCount: 2,
+    //     // unhealthyThresholdCount: 6,
+    //     // timeout: Duration.seconds(10),
+    //     // interval: Duration.seconds(15),
+    //   },
+    // });
   }
 
 
@@ -193,6 +195,10 @@ export class EcsFargateService extends Construct {
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
+    });
+
+    service.associateCloudMapService({
+      service: props.cloudMapsService,
     });
 
     service.node.addDependency(props.ecsCluster);

@@ -14,6 +14,7 @@ import {
   aws_iam as iam,
   aws_apigatewayv2 as cdkApigatewayV2,
   aws_logs as logs,
+  Duration,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
@@ -29,10 +30,11 @@ export class ContainerClusterStack extends Stack {
 
     const hostedzone = this.importHostedZone();
     const vpc = this.setupVpc();
-    const listner = this.setupLoadbalancer(vpc, hostedzone);
+    const namespace = this.setupCloudMap(vpc);
     const cluster =this.constructEcsCluster(vpc);
     const api = this.setupApiGateway(hostedzone);
-    this.addIssueService(cluster, listner, api);
+    const vpcLink = new apigatewayv2.VpcLink(this, 'vpc-link', { vpc });
+    this.addIssueService(cluster, namespace, api, vpcLink);
   }
 
   setupVpc() {
@@ -166,8 +168,9 @@ export class ContainerClusterStack extends Stack {
 
   addIssueService(
     cluster: ecs.Cluster,
-    listner: loadbalancing.ApplicationListener,
+    namespace: servicediscovery.PrivateDnsNamespace,
     api: apigatewayv2.HttpApi,
+    vpcLink: apigatewayv2.VpcLink,
   ) {
 
     // const region = props.configuration.deployFromEnvironment.region;
@@ -175,24 +178,33 @@ export class ContainerClusterStack extends Stack {
     // const branch = props.configuration.branchName;
     // const ecrRepositoryArn = `arn:aws:ecr:${region}:${account}:repository/yivi-issue-server-${branch}`;
 
+    const cloudMapsService = namespace.createService('yivi-issue-service', {
+      description: 'CloudMap for yivi-issue-service',
+      dnsRecordType: servicediscovery.DnsRecordType.SRV, // Only supported
+      dnsTtl: Duration.seconds(10), // Max 10 seconds downtime?
+    });
+
     new EcsFargateService(this, 'issue-service', {
       serviceName: 'yivi-issue',
       containerImage: 'nginxdemos/hello',
       repositoryArn: '',
       containerPort: 80,
       ecsCluster: cluster,
-      listner: listner,
       serviceListnerPath: '/irma',
       desiredtaskcount: 1,
       useSpotInstances: true,
       healthCheckPath: '/status',
+      cloudMapsService,
     });
 
     api.addRoutes({
       path: '/irma',
       methods: [apigatewayv2.HttpMethod.ANY],
-      integration: new apigatewayv2Integrations.HttpAlbIntegration('api-integration', listner),
+      integration: new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', cloudMapsService, {
+        vpcLink,
+      }),
     });
+
 
   }
 
