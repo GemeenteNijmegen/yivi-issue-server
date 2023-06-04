@@ -33,12 +33,7 @@ export class ContainerClusterStack extends Stack {
     const namespace = this.setupCloudMap(vpc);
     const cluster =this.constructEcsCluster(vpc);
     const api = this.setupApiGateway(hostedzone);
-    const sg = new ec2.SecurityGroup(this, 'vpc-link-sg', {
-      vpc,
-      allowAllOutbound: true,
-    });
-    sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80));
-    const vpcLink = new apigatewayv2.VpcLink(this, 'vpc-link', { vpc, securityGroups: [sg] });
+    const vpcLink = this.setupVpcLink(vpc);
     this.addIssueService(cluster, namespace, api, vpcLink);
   }
 
@@ -62,6 +57,15 @@ export class ContainerClusterStack extends Stack {
     });
 
     return vpc;
+  }
+
+  setupVpcLink(vpc: ec2.IVpc){
+    // const sg = new ec2.SecurityGroup(this, 'vpc-link-sg', {
+    //   vpc,
+    //   allowAllOutbound: true,
+    // });
+    // sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80));
+    return new apigatewayv2.VpcLink(this, 'vpc-link', { vpc });
   }
 
   importHostedZone() {
