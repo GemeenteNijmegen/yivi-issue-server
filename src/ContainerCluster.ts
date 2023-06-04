@@ -130,7 +130,7 @@ export class ContainerClusterStack extends Stack {
         integrationStatus3: '$context.integrationStatus',
       }),
     };
-/*
+    /*
 
 */
     const alias = new route53Targets.ApiGatewayv2DomainProperties(domainname.regionalDomainName, domainname.regionalHostedZoneId);
@@ -200,8 +200,8 @@ export class ContainerClusterStack extends Stack {
       description: 'CloudMap for yivi-issue-service',
       dnsRecordType: servicediscovery.DnsRecordType.SRV, // Only supported
       dnsTtl: Duration.seconds(10), // Max 10 seconds downtime?
-      healthCheck: {
-        resourcePath: '/status'
+      customHealthCheck: { // By setting custom health checks object we use ECS health check status!
+        failureThreshold: 1,
       },
     });
 

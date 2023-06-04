@@ -172,8 +172,8 @@ export class EcsFargateService extends Construct {
       }],
       readonlyRootFilesystem: false,
       healthCheck: {
-        command: ['CMD-SHELL', 'curl -f localhost/status || exit 1']
-      }
+        command: ['CMD-SHELL', 'curl -f localhost/status || exit 1'],
+      },
     });
     return taskDef;
   }
