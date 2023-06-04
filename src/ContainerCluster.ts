@@ -200,6 +200,9 @@ export class ContainerClusterStack extends Stack {
       description: 'CloudMap for yivi-issue-service',
       dnsRecordType: servicediscovery.DnsRecordType.SRV, // Only supported
       dnsTtl: Duration.seconds(10), // Max 10 seconds downtime?
+      healthCheck: {
+        resourcePath: '/status'
+      },
     });
 
     new EcsFargateService(this, 'issue-service', {
