@@ -16,6 +16,7 @@ import {
   aws_logs as logs,
   Duration,
 } from 'aws-cdk-lib';
+import { SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
 import { EcsFargateService } from './constructs/EcsFargateService';
@@ -32,9 +33,13 @@ export class ContainerClusterStack extends Stack {
     const vpc = this.setupVpc();
     const namespace = this.setupCloudMap(vpc);
     const cluster =this.constructEcsCluster(vpc);
+
+    // API Gateway and access to VPC
     const api = this.setupApiGateway(hostedzone);
-    const vpcLink = this.setupVpcLink(vpc);
-    this.addIssueService(cluster, namespace, api, vpcLink);
+    const vpcLinkSecurityGroup = this.setupVpcLinkSecurityGroup(vpc);
+    const vpcLink = this.setupVpcLink(vpc, vpcLinkSecurityGroup);
+
+    this.addIssueService(cluster, namespace, api, vpcLink, vpc, vpcLinkSecurityGroup);
   }
 
   setupVpc() {
@@ -59,13 +64,17 @@ export class ContainerClusterStack extends Stack {
     return vpc;
   }
 
-  setupVpcLink(vpc: ec2.IVpc){
-    // const sg = new ec2.SecurityGroup(this, 'vpc-link-sg', {
-    //   vpc,
-    //   allowAllOutbound: true,
-    // });
-    // sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80));
-    return new apigatewayv2.VpcLink(this, 'vpc-link', { vpc });
+  setupVpcLinkSecurityGroup(vpc: ec2.IVpc) {
+    const sg = new ec2.SecurityGroup(this, 'vpc-link-sg', {
+      vpc,
+      allowAllOutbound: true,
+    });
+    sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80));
+    return sg;
+  }
+
+  setupVpcLink(vpc: ec2.IVpc, securityGroup: ec2.ISecurityGroup) {
+    return new apigatewayv2.VpcLink(this, 'vpc-link', { vpc, securityGroups: [securityGroup] });
   }
 
   importHostedZone() {
@@ -193,6 +202,8 @@ export class ContainerClusterStack extends Stack {
     namespace: servicediscovery.PrivateDnsNamespace,
     api: apigatewayv2.HttpApi,
     vpcLink: apigatewayv2.VpcLink,
+    vpc: ec2.IVpc,
+    vpcLinkSecurityGroup: ec2.SecurityGroup,
   ) {
 
     // const region = props.configuration.deployFromEnvironment.region;
@@ -209,6 +220,9 @@ export class ContainerClusterStack extends Stack {
       },
     });
 
+    const sg = new SecurityGroup(this, 'issue-service-sg', { vpc });
+    sg.addIngressRule(ec2.Peer.securityGroupId(vpcLinkSecurityGroup.securityGroupId), ec2.Port.tcp(80));
+
     new EcsFargateService(this, 'issue-service', {
       serviceName: 'yivi-issue',
       containerImage: 'nginxdemos/hello',
@@ -220,6 +234,7 @@ export class ContainerClusterStack extends Stack {
       useSpotInstances: true,
       healthCheckPath: '/status',
       cloudMapsService,
+      securityGroups: [sg],
     });
 
     api.addRoutes({

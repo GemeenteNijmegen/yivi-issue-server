@@ -3,7 +3,7 @@ import {
   aws_ecs as ecs,
   aws_secretsmanager as secrets,
 } from 'aws-cdk-lib';
-import { SubnetType } from 'aws-cdk-lib/aws-ec2';
+import { SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { IService } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
@@ -71,6 +71,11 @@ export interface EcsFargateServiceProps {
   // listner: loadbalancing.ApplicationListener;
 
   cloudMapsService: IService;
+
+  /**
+   * Provide security groups for this service
+   */
+  securityGroups?: SecurityGroup[];
 }
 
 
@@ -184,6 +189,7 @@ export class EcsFargateService extends Construct {
    * @param props
    */
   private setupFargateService(task: ecs.TaskDefinition, props: EcsFargateServiceProps) {
+
     const service = new ecs.FargateService(this, `${props.serviceName}-service`, {
       cluster: props.ecsCluster,
       serviceName: `${props.serviceName}-service`,
@@ -198,6 +204,7 @@ export class EcsFargateService extends Construct {
       vpcSubnets: {
         subnetType: SubnetType.PRIVATE_WITH_EGRESS,
       },
+      securityGroups: props.securityGroups,
     });
 
     service.associateCloudMapService({
