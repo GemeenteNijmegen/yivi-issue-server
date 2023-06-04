@@ -119,12 +119,20 @@ export class ContainerClusterStack extends Stack {
         domainName: '$context.domainName',
         errorMessage: '$context.error.message',
         errorType: '$context.error.responseType',
-        integrationError: '$context.integration.error',
-        integrationStatus: '$context.integration.status',
         stage: '$context.stage',
+        integrationError: '$context.integration.error',
+        integrationStatus: '$context.integration.integrationStatus',
+        integrationLatency: '$context.integration.latency',
+        integrationRequestId: '$context.integration.requestId',
+        integrationErrorMessage: '$context.integrationErrorMessage',
+        integrationLatency2: '$context.integrationLatency',
+        integrationStatus2: '$context.integration.status',
+        integrationStatus3: '$context.integrationStatus',
       }),
     };
+/*
 
+*/
     const alias = new route53Targets.ApiGatewayv2DomainProperties(domainname.regionalDomainName, domainname.regionalHostedZoneId);
     new route53.ARecord(this, 'api-a-record', {
       zone: hostedzone,
