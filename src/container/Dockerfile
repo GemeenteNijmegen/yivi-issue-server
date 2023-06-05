@@ -24,6 +24,7 @@ RUN install -d -o irma -g irma -m 0755 /usr/local/share/irma && \
     install -d -o irma -g irma -m 0755 /usr/local/share/irma/privatekeys
 
 COPY irma_config_steps.sh /tmp/irma_config_steps.sh 
+COPY health_chek.sh /tmp/health_chek.sh
 COPY irma_config.json /usr/local/share/irma/irma_config.json 
 RUN chmod +x /tmp/irma_config_steps.sh 
 USER irma

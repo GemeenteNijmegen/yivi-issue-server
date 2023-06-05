@@ -320,7 +320,7 @@ export class ContainerClusterStack extends Stack {
       serviceListnerPath: '/irma',
       desiredtaskcount: 1,
       useSpotInstances: true,
-      healthCheckPath: '/status',
+      healthCheckCommand: '/tmp/health_check.sh',
       cloudMapsService,
       securityGroups: [sg],
     });

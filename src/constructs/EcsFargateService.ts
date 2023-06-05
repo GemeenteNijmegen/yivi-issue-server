@@ -64,9 +64,11 @@ export interface EcsFargateServiceProps {
   useSpotInstances?: boolean;
 
   /**
-   * Path the call on the container during health check
+   * The command that is executed using the default shell in the container
+   * exit code 0 is considered healthy.
+   * Example 'wget localhost:80/irma -O /dev/null -q || exit 1'
    */
-  healthCheckPath: string;
+  healthCheckCommand: string;
 
   /**
    * CloudMap Service to register the task instances for loadbalancing
@@ -141,7 +143,7 @@ export class EcsFargateService extends Construct {
       }],
       readonlyRootFilesystem: false,
       healthCheck: {
-        command: ['CMD-SHELL', 'curl -f localhost/status || exit 1'],
+        command: ['CMD-SHELL', props.healthCheckCommand],
       },
     });
     return taskDef;
