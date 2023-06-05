@@ -89,6 +89,10 @@
       "type": "runtime"
     },
     {
+      "name": "@aws-cdk/aws-apigatewayv2-authorizers-alpha",
+      "type": "runtime"
+    },
+    {
       "name": "@aws-cdk/aws-apigatewayv2-integrations-alpha",
       "type": "runtime"
     },

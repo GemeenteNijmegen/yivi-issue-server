@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { Environment } from 'aws-cdk-lib';
 import { Statics } from './Statics';
 
@@ -13,8 +12,18 @@ export interface Configuration {
   codeStarConnectionArn: string;
   deployFromEnvironment: Environment;
   deployToEnvironment: Environment;
+
+  /**
+   * Provide a list of ARNs that may invoke
+   * the sessions endpoint in the API gateway.
+   */
   sessionEndpointAllowList: string[];
-  apiGatewayAlbSecurityToken: string;
+
+  /**
+   * Indicates if an IAM user should be created an have rights
+   * to access the API (only deploy to accp)
+   */
+  sessionEndpointIamUser: boolean;
 }
 
 export const configurations: { [key: string]: Configuration } = {
@@ -26,9 +35,9 @@ export const configurations: { [key: string]: Configuration } = {
     deployFromEnvironment: Statics.deploymentEnvironment,
     deployToEnvironment: Statics.acceptanceEnvironment,
     sessionEndpointAllowList: [
-      '', // TODO arn of issue lambda in Yivi issue app
+      'arn:aws:lambda:eu-west-1:315037222840:function:yivi-issue-api-api-stack-yiviissueissuefunctionlam-k21aqrhAoP0m',
     ],
-    apiGatewayAlbSecurityToken: randomUUID(), // By making this randomly the token rotates every deployment
+    sessionEndpointIamUser: true,
   },
 };
 

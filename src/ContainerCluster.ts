@@ -1,4 +1,5 @@
 import * as apigatewayv2 from '@aws-cdk/aws-apigatewayv2-alpha';
+import * as apigatewayv2Authorizers from '@aws-cdk/aws-apigatewayv2-authorizers-alpha';
 import * as apigatewayv2Integrations from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
 import {
   Stack, Fn, Aws, StackProps,
@@ -22,7 +23,7 @@ import { Configurable } from './Configuration';
 import { EcsFargateService } from './constructs/EcsFargateService';
 import { Statics } from './Statics';
 
-export interface ContainerClusterStackProps extends StackProps, Configurable {}
+export interface ContainerClusterStackProps extends StackProps, Configurable { }
 
 export class ContainerClusterStack extends Stack {
 
@@ -32,7 +33,7 @@ export class ContainerClusterStack extends Stack {
     const hostedzone = this.importHostedZone();
     const vpc = this.setupVpc();
     const namespace = this.setupCloudMap(vpc);
-    const cluster =this.constructEcsCluster(vpc);
+    const cluster = this.constructEcsCluster(vpc);
 
     // API Gateway and access to VPC
     const api = this.setupApiGateway(hostedzone);
@@ -46,9 +47,9 @@ export class ContainerClusterStack extends Stack {
   }
 
   setupApiRoutes(
-    api: apigatewayv2.HttpApi, 
-    integration: apigatewayv2Integrations.HttpServiceDiscoveryIntegration
-  ){
+    api: apigatewayv2.HttpApi,
+    integration: apigatewayv2Integrations.HttpServiceDiscoveryIntegration,
+  ) {
 
     // Public
     api.addRoutes({
@@ -58,28 +59,32 @@ export class ContainerClusterStack extends Stack {
       integration: integration,
     });
 
+    const authorizer = new apigatewayv2Authorizers.HttpIamAuthorizer();
+
     // Private paths below
     api.addRoutes({
+      authorizer,
       path: '/session',
       methods: [apigatewayv2.HttpMethod.POST],
       integration: integration,
     });
-    
-    
 
     api.addRoutes({
+      authorizer,
       path: '/session/{token}',
       methods: [apigatewayv2.HttpMethod.DELETE],
       integration: integration,
     });
 
     api.addRoutes({
+      authorizer,
       path: '/session/{token}/result',
       methods: [apigatewayv2.HttpMethod.GET],
       integration: integration,
     });
 
     api.addRoutes({
+      authorizer,
       path: '/session/{token}/status',
       methods: [apigatewayv2.HttpMethod.GET],
       integration: integration,
@@ -87,6 +92,7 @@ export class ContainerClusterStack extends Stack {
 
     // Dont thinks this is required as we have no events support in apigateway
     // api.addRoutes({
+    //   authorizer,
     //   path: '/session/{token}/statusevents',
     //   methods: [apigatewayv2.HttpMethod.GET],
     //   integration: integration,
