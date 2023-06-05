@@ -72,41 +72,47 @@ export class ContainerClusterStack extends Stack {
     const authorizer = new apigatewayv2Authorizers.HttpIamAuthorizer();
 
     // Private paths below
-    const session = api.addRoutes({
+    api.addRoutes({
       authorizer,
       path: '/session',
       methods: [apigatewayv2.HttpMethod.POST],
       integration: integration,
     });
 
-    const token = api.addRoutes({
+    api.addRoutes({
       authorizer,
       path: '/session/{token}',
       methods: [apigatewayv2.HttpMethod.DELETE],
       integration: integration,
     });
 
-    const result = api.addRoutes({
+    api.addRoutes({
       authorizer,
       path: '/session/{token}/result',
       methods: [apigatewayv2.HttpMethod.GET],
       integration: integration,
     });
 
-    const status = api.addRoutes({
+    api.addRoutes({
       authorizer,
       path: '/session/{token}/status',
       methods: [apigatewayv2.HttpMethod.GET],
       integration: integration,
     });
 
-    // Make sure all provided arns and optional user are allowed to invoke the API
-    const allRoutes = session.concat(token, result, status);
-    allRoutes.forEach(route => {
-      allowInvokePrincipals.forEach(principal => {
-        route.grantInvoke(principal);
-      });
-    });
+    const region = Stack.of(this).region;
+    const account = Stack.of(this).account;
+    const invokeArn = `arn:aws:execute-api:${region}:${account}:${api.apiId}/*/*/session*`;
+
+
+    if(user){
+      user.addToPolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: [ 'execute-api:Invoke' ],
+        resources: [ invokeArn ],
+      }))
+    }
+
 
     // Dont thinks this is required as we have no events support in apigateway
     // api.addRoutes({
@@ -314,6 +320,11 @@ export class ContainerClusterStack extends Stack {
 
     return new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', cloudMapsService, {
       vpcLink,
+      parameterMapping: new apigatewayv2.ParameterMapping()
+        .overwriteHeader(
+          'Authorization',
+          apigatewayv2.MappingValue.requestHeader('Irma-Authorization'),
+        ),
     });
 
   }
