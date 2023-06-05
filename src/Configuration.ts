@@ -24,6 +24,11 @@ export interface Configuration {
    * to access the API (only deploy to accp)
    */
   sessionEndpointIamUser: boolean;
+
+  /**
+   * Incidator for which configuration file to use
+   */
+  buildTargetEnvironment: 'accp' | 'prod';
 }
 
 export const configurations: { [key: string]: Configuration } = {
@@ -38,6 +43,7 @@ export const configurations: { [key: string]: Configuration } = {
       'arn:aws:lambda:eu-west-1:315037222840:function:yivi-issue-api-api-stack-yiviissueissuefunctionlam-k21aqrhAoP0m',
     ],
     sessionEndpointIamUser: true,
+    buildTargetEnvironment: 'accp',
   },
 };
 

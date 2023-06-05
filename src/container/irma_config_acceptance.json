@@ -7,7 +7,7 @@
   "EnableSSE": false,
   "verbose": 8,
   "quiet": false,
-  "log_json": false,
+  "log_json": true,
   "production": true,
   "email": "b.withaar@nijmegen.nl",
   "no_email": "false",
@@ -21,15 +21,12 @@
     "*"
   ],
   "no_auth": false,
-  "port": 8080,
+  "port": 80,
   "requestors": {
     "irmaapp": {
       "auth_method": "token",
       "key": "IRMA_TOKEN"
     }
   },
-  "max_request_age": 300,
-  "store_type": "redis",
-  "redis_addr": "master.irma-issue-multi-az.j1ru1n.euw1.cache.amazonaws.com:6379",
-  "redis_pw": "supersecretpassword"
+  "max_request_age": 300
 }
