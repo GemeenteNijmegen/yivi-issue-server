@@ -43,7 +43,7 @@ export interface EcsFargateServiceProps {
   /**
    * The container image to use (e.g. on dockerhub)
    */
-  containerImage: string;
+  containerImage: ecs.ContainerImage;
 
   /**
    * Container listing port
@@ -69,12 +69,8 @@ export interface EcsFargateServiceProps {
   healthCheckPath: string;
 
   /**
-   * ARN of the image's ECR repository
+   * CloudMap Service to register the task instances for loadbalancing
    */
-  repositoryArn: string;
-
-  // listner: loadbalancing.ApplicationListener;
-
   cloudMapsService: IService;
 
   /**
@@ -134,13 +130,8 @@ export class EcsFargateService extends Construct {
       memoryMiB: '512',
     });
 
-    // const ecrRepository = ecr.Repository.fromRepositoryArn(this, 'repository', props.repositoryArn);
-
     taskDef.addContainer(`${props.serviceName}-container`, {
-      //image: ecs.ContainerImage.fromEcrRepository(ecrRepository),
-      image: ecs.ContainerImage.fromRegistry(props.containerImage, {
-        credentials: props.dockerhubSecret,
-      }),
+      image: props.containerImage,
       logging: new ecs.AwsLogDriver({
         streamPrefix: 'logs',
         logGroup: logGroup,

@@ -15,6 +15,7 @@ import {
   aws_iam as iam,
   aws_apigatewayv2 as cdkApigatewayV2,
   aws_logs as logs,
+  aws_ecr as ecr,
   Duration,
 } from 'aws-cdk-lib';
 import { SecurityGroup } from 'aws-cdk-lib/aws-ec2';
@@ -41,7 +42,7 @@ export class ContainerClusterStack extends Stack {
     const vpcLink = this.setupVpcLink(vpc, vpcLinkSecurityGroup);
 
     // Setup services and api gateway routes
-    const yiviIssueIntegration = this.addIssueServiceAndIntegration(cluster, namespace, vpcLink, vpc, vpcLinkSecurityGroup);
+    const yiviIssueIntegration = this.addIssueServiceAndIntegration(cluster, namespace, vpcLink, vpc, vpcLinkSecurityGroup, props);
     this.setupApiRoutes(api, yiviIssueIntegration, props);
 
   }
@@ -284,13 +285,19 @@ export class ContainerClusterStack extends Stack {
     vpcLink: apigatewayv2.VpcLink,
     vpc: ec2.IVpc,
     vpcLinkSecurityGroup: ec2.SecurityGroup,
+    props: ContainerClusterStackProps,
   ) {
 
-    // const region = props.configuration.deployFromEnvironment.region;
-    // const account = props.configuration.deployFromEnvironment.account;
-    // const branch = props.configuration.branchName;
-    // const ecrRepositoryArn = `arn:aws:ecr:${region}:${account}:repository/yivi-issue-server-${branch}`;
+    // Define the image to use for the service
+    const region = props.configuration.deployFromEnvironment.region;
+    const account = props.configuration.deployFromEnvironment.account;
+    const branch = props.configuration.branchName;
+    const ecrRepositoryArn = `arn:aws:ecr:${region}:${account}:repository/yivi-issue-server-${branch}`;
+    const ecrRepository = ecr.Repository.fromRepositoryArn(this, 'repository', ecrRepositoryArn );
+    //const image = ecs.ContainerImage.fromRegistry('nginxdemos/hello');
+    const image = ecs.ContainerImage.fromEcrRepository(ecrRepository);
 
+    // Make sure the service can be reached by the API gateway via CloudMap
     const cloudMapsService = namespace.createService('yivi-issue-service', {
       description: 'CloudMap for yivi-issue-service',
       dnsRecordType: servicediscovery.DnsRecordType.SRV, // Only supported
@@ -300,13 +307,14 @@ export class ContainerClusterStack extends Stack {
       },
     });
 
+    // Allow traffic to the container
     const sg = new SecurityGroup(this, 'issue-service-sg', { vpc });
     sg.addIngressRule(ec2.Peer.securityGroupId(vpcLinkSecurityGroup.securityGroupId), ec2.Port.tcp(80));
 
+    // Create the service
     new EcsFargateService(this, 'issue-service', {
       serviceName: 'yivi-issue',
-      containerImage: 'nginxdemos/hello',
-      repositoryArn: '',
+      containerImage: image,
       containerPort: 80,
       ecsCluster: cluster,
       serviceListnerPath: '/irma',
@@ -317,6 +325,7 @@ export class ContainerClusterStack extends Stack {
       securityGroups: [sg],
     });
 
+    // Setup an integration for the API gateway to find the task in this ecs service
     return new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', cloudMapsService, {
       vpcLink,
       // parameterMapping cannote be used for the authorization header as it is reserved
