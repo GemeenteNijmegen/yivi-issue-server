@@ -42,14 +42,24 @@ export class ContainerClusterStack extends Stack {
 
     // Setup services and api gateway routes
     const yiviIssueIntegration = this.addIssueServiceAndIntegration(cluster, namespace, vpcLink, vpc, vpcLinkSecurityGroup);
-    this.setupApiRoutes(api, yiviIssueIntegration);
+    this.setupApiRoutes(api, yiviIssueIntegration, props);
 
   }
 
   setupApiRoutes(
     api: apigatewayv2.HttpApi,
     integration: apigatewayv2Integrations.HttpServiceDiscoveryIntegration,
+    props: ContainerClusterStackProps,
   ) {
+
+
+    const allowInvokePrincipals = props.configuration.sessionEndpointAllowList.map(arn => new iam.ArnPrincipal(arn));
+
+    let user = undefined;
+    if (props.configuration.sessionEndpointIamUser) {
+      user = new iam.User(this, 'yivi-api-user', {});
+      allowInvokePrincipals.push(new iam.ArnPrincipal(user.userArn));
+    }
 
     // Public
     api.addRoutes({
@@ -62,32 +72,40 @@ export class ContainerClusterStack extends Stack {
     const authorizer = new apigatewayv2Authorizers.HttpIamAuthorizer();
 
     // Private paths below
-    api.addRoutes({
+    const session = api.addRoutes({
       authorizer,
       path: '/session',
       methods: [apigatewayv2.HttpMethod.POST],
       integration: integration,
     });
 
-    api.addRoutes({
+    const token = api.addRoutes({
       authorizer,
       path: '/session/{token}',
       methods: [apigatewayv2.HttpMethod.DELETE],
       integration: integration,
     });
 
-    api.addRoutes({
+    const result = api.addRoutes({
       authorizer,
       path: '/session/{token}/result',
       methods: [apigatewayv2.HttpMethod.GET],
       integration: integration,
     });
 
-    api.addRoutes({
+    const status = api.addRoutes({
       authorizer,
       path: '/session/{token}/status',
       methods: [apigatewayv2.HttpMethod.GET],
       integration: integration,
+    });
+
+    // Make sure all provided arns and optional user are allowed to invoke the API
+    const allRoutes = session.concat(token, result, status);
+    allRoutes.forEach(route => {
+      allowInvokePrincipals.forEach(principal => {
+        route.grantInvoke(principal);
+      });
     });
 
     // Dont thinks this is required as we have no events support in apigateway
