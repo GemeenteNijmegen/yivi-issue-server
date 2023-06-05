@@ -105,12 +105,12 @@ export class ContainerClusterStack extends Stack {
     const invokeArn = `arn:aws:execute-api:${region}:${account}:${api.apiId}/*/*/session*`;
 
 
-    if(user){
+    if (user) {
       user.addToPolicy(new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
-        actions: [ 'execute-api:Invoke' ],
-        resources: [ invokeArn ],
-      }))
+        actions: ['execute-api:Invoke'],
+        resources: [invokeArn],
+      }));
     }
 
 
@@ -320,11 +320,11 @@ export class ContainerClusterStack extends Stack {
 
     return new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', cloudMapsService, {
       vpcLink,
-      parameterMapping: new apigatewayv2.ParameterMapping()
-        .overwriteHeader(
-          'Authorization',
-          apigatewayv2.MappingValue.requestHeader('Irma-Authorization'),
-        ),
+      // parameterMapping: new apigatewayv2.ParameterMapping()
+      //   .overwriteHeader(
+      //     'Authorization',
+      //     apigatewayv2.MappingValue.requestHeader('Irma-Authorization'),
+      //   ),
     });
 
   }
