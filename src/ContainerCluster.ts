@@ -104,7 +104,6 @@ export class ContainerClusterStack extends Stack {
     const account = Stack.of(this).account;
     const invokeArn = `arn:aws:execute-api:${region}:${account}:${api.apiId}/*/*/session*`;
 
-
     if (user) {
       user.addToPolicy(new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
@@ -112,15 +111,6 @@ export class ContainerClusterStack extends Stack {
         resources: [invokeArn],
       }));
     }
-
-
-    // Dont thinks this is required as we have no events support in apigateway
-    // api.addRoutes({
-    //   authorizer,
-    //   path: '/session/{token}/statusevents',
-    //   methods: [apigatewayv2.HttpMethod.GET],
-    //   integration: integration,
-    // });
 
   }
 
@@ -175,6 +165,15 @@ export class ContainerClusterStack extends Stack {
     });
   }
 
+  /**
+   * Consequences of using API Gateway V2:
+   *  - Direct integration with CloudMap (no loadbalancer required)
+   *  - No intrgration with WAF
+   *  - No resource-policies for access management
+   * More differences can be found here https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vs-rest.html
+   * @param hostedzone
+   * @returns
+   */
   setupApiGateway(hostedzone: route53.IHostedZone) {
 
     const cert = new acm.Certificate(this, 'api-cert', {
@@ -320,11 +319,8 @@ export class ContainerClusterStack extends Stack {
 
     return new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', cloudMapsService, {
       vpcLink,
-      // parameterMapping: new apigatewayv2.ParameterMapping()
-      //   .overwriteHeader(
-      //     'Authorization',
-      //     apigatewayv2.MappingValue.requestHeader('Irma-Authorization'),
-      //   ),
+      // parameterMapping cannote be used for the authorization header as it is reserved
+      // We'll have to figure that one out in the container itself.
     });
 
   }
