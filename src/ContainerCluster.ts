@@ -39,7 +39,59 @@ export class ContainerClusterStack extends Stack {
     const vpcLinkSecurityGroup = this.setupVpcLinkSecurityGroup(vpc);
     const vpcLink = this.setupVpcLink(vpc, vpcLinkSecurityGroup);
 
-    this.addIssueService(cluster, namespace, api, vpcLink, vpc, vpcLinkSecurityGroup);
+    // Setup services and api gateway routes
+    const yiviIssueIntegration = this.addIssueServiceAndIntegration(cluster, namespace, vpcLink, vpc, vpcLinkSecurityGroup);
+    this.setupApiRoutes(api, yiviIssueIntegration);
+
+  }
+
+  setupApiRoutes(
+    api: apigatewayv2.HttpApi, 
+    integration: apigatewayv2Integrations.HttpServiceDiscoveryIntegration
+  ){
+
+    // Public
+    api.addRoutes({
+      authorizer: new apigatewayv2.HttpNoneAuthorizer(),
+      path: '/irma/{proxy+}',
+      methods: [apigatewayv2.HttpMethod.ANY],
+      integration: integration,
+    });
+
+    // Private paths below
+    api.addRoutes({
+      path: '/session',
+      methods: [apigatewayv2.HttpMethod.POST],
+      integration: integration,
+    });
+    
+    
+
+    api.addRoutes({
+      path: '/session/{token}',
+      methods: [apigatewayv2.HttpMethod.DELETE],
+      integration: integration,
+    });
+
+    api.addRoutes({
+      path: '/session/{token}/result',
+      methods: [apigatewayv2.HttpMethod.GET],
+      integration: integration,
+    });
+
+    api.addRoutes({
+      path: '/session/{token}/status',
+      methods: [apigatewayv2.HttpMethod.GET],
+      integration: integration,
+    });
+
+    // Dont thinks this is required as we have no events support in apigateway
+    // api.addRoutes({
+    //   path: '/session/{token}/statusevents',
+    //   methods: [apigatewayv2.HttpMethod.GET],
+    //   integration: integration,
+    // });
+
   }
 
   setupVpc() {
@@ -197,10 +249,9 @@ export class ContainerClusterStack extends Stack {
     return listner;
   }
 
-  addIssueService(
+  addIssueServiceAndIntegration(
     cluster: ecs.Cluster,
     namespace: servicediscovery.PrivateDnsNamespace,
-    api: apigatewayv2.HttpApi,
     vpcLink: apigatewayv2.VpcLink,
     vpc: ec2.IVpc,
     vpcLinkSecurityGroup: ec2.SecurityGroup,
@@ -237,14 +288,9 @@ export class ContainerClusterStack extends Stack {
       securityGroups: [sg],
     });
 
-    api.addRoutes({
-      path: '/irma',
-      methods: [apigatewayv2.HttpMethod.ANY],
-      integration: new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', cloudMapsService, {
-        vpcLink,
-      }),
+    return new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', cloudMapsService, {
+      vpcLink,
     });
-
 
   }
 
