@@ -340,7 +340,7 @@ export class ContainerClusterStack extends Stack {
         IRMA_TOKEN: ecs.Secret.fromSecretsManager(apiKey),
       },
       environment: {
-        IRMA_GW_URL: `https://${hostedzone.zoneName}`,
+        IRMA_GW_URL: `http://${hostedzone.zoneName}/`,
       },
     });
 
