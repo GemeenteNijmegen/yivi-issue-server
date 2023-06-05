@@ -79,6 +79,16 @@ export interface EcsFargateServiceProps {
    * Provide security groups for this service
    */
   securityGroups?: SecurityGroup[];
+
+  /**
+   * Secrets to pass to the container on startup
+   */
+  secrets?: { [key: string]: ecs.Secret };
+
+  /**
+   * Environment variables to pass to the container on startup
+   */
+  environment?: { [key: string]: string };
 }
 
 
@@ -145,6 +155,8 @@ export class EcsFargateService extends Construct {
       healthCheck: {
         command: ['CMD-SHELL', props.healthCheckCommand],
       },
+      secrets: props.secrets,
+      environment: props.environment,
     });
     return taskDef;
   }

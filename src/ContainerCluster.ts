@@ -19,6 +19,7 @@ import {
   Duration,
 } from 'aws-cdk-lib';
 import { SecurityGroup } from 'aws-cdk-lib/aws-ec2';
+import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
 import { EcsFargateService } from './constructs/EcsFargateService';
@@ -42,7 +43,15 @@ export class ContainerClusterStack extends Stack {
     const vpcLink = this.setupVpcLink(vpc, vpcLinkSecurityGroup);
 
     // Setup services and api gateway routes
-    const yiviIssueIntegration = this.addIssueServiceAndIntegration(cluster, namespace, vpcLink, vpc, vpcLinkSecurityGroup, props);
+    const yiviIssueIntegration = this.addIssueServiceAndIntegration(
+      cluster,
+      namespace,
+      vpcLink,
+      vpc,
+      vpcLinkSecurityGroup,
+      props,
+      hostedzone,
+    );
     this.setupApiRoutes(api, yiviIssueIntegration, props);
 
   }
@@ -286,6 +295,7 @@ export class ContainerClusterStack extends Stack {
     vpc: ec2.IVpc,
     vpcLinkSecurityGroup: ec2.SecurityGroup,
     props: ContainerClusterStackProps,
+    hostedzone: route53.IHostedZone,
   ) {
 
     // Define the image to use for the service
@@ -311,8 +321,11 @@ export class ContainerClusterStack extends Stack {
     const sg = new SecurityGroup(this, 'issue-service-sg', { vpc });
     sg.addIngressRule(ec2.Peer.securityGroupId(vpcLinkSecurityGroup.securityGroupId), ec2.Port.tcp(80));
 
+    // Get secrets
+    const apiKey = Secret.fromSecretNameV2(this, 'api-key', Statics.secretsApiKey);
+
     // Create the service
-    new EcsFargateService(this, 'issue-service', {
+    const service = new EcsFargateService(this, 'issue-service', {
       serviceName: 'yivi-issue',
       containerImage: image,
       containerPort: 80,
@@ -323,7 +336,15 @@ export class ContainerClusterStack extends Stack {
       healthCheckCommand: '/tmp/health_check.sh',
       cloudMapsService,
       securityGroups: [sg],
+      secrets: {
+        IRMA_TOKEN: ecs.Secret.fromSecretsManager(apiKey),
+      },
+      environment: {
+        IRMA_GW_URL: `https://${hostedzone.zoneName}`,
+      },
     });
+
+    apiKey.grantRead(service.service.taskDefinition.taskRole);
 
     // Setup an integration for the API gateway to find the task in this ecs service
     return new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', cloudMapsService, {

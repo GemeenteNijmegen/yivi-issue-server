@@ -1,7 +1,7 @@
 import {
   Stack,
   StackProps,
-  aws_ssm as ssm,
+  aws_secretsmanager as secrets,
 } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Statics } from './Statics';
@@ -12,11 +12,12 @@ export class ParameterStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    new ssm.StringParameter(this, 'ssm-1', {
-      parameterName: Statics.ssmLoadbalancerSecurityHeader,
-      description: 'Loadbalancer API gateway authentication header',
-      stringValue: '-',
+    new secrets.Secret(this, 'api-key', {
+      secretName: Statics.secretsApiKey,
+      description: 'API KEY for YIVI issue server',
     });
+
+
   }
 
 }
