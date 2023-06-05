@@ -2,10 +2,15 @@ import {
   aws_logs as logs,
   aws_ecs as ecs,
   aws_secretsmanager as secrets,
+  aws_cloudwatch as cloudwatch,
 } from 'aws-cdk-lib';
 import { SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { IService } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
+
+const ALARM_THRESHOLD = 70;
+const ALARM_DATA_POINTS = 3;
+const ALARM_EVAL_PERIODS = 5;
 
 export interface EcsFargateServiceProps {
   /**
@@ -101,41 +106,9 @@ export class EcsFargateService extends Construct {
     // Task, service and expose to loadbalancer
     const task = this.setupTaskDefinition(logGroup, props);
     this.service = this.setupFargateService(task, props);
-
-    //this.setupLoadbalancerTarget(this.service, props);
+    this.setupContainerMonitoring(props);
 
   }
-
-
-  /**
-   * Exposes the service to the loadbalancer listner on a given path and port
-   * @param service
-   * @param props
-   */
-  setupLoadbalancerTarget(_service: ecs.FargateService, _props: EcsFargateServiceProps) {
-
-    // const conditions = [
-    //   loadbalancing.ListenerCondition.pathPatterns([props.serviceListnerPath]),
-    // ];
-
-    // props.listner.addTargets(`${props.serviceName}-target`, {
-    //   port: props.containerPort,
-    //   protocol: loadbalancing.ApplicationProtocol.HTTP,
-    //   targets: [service],
-    //   conditions,
-    //   priority: 10,
-    //   healthCheck: {
-    //     enabled: true,
-    //     path: props.healthCheckPath,
-    //     // healthyHttpCodes: '200',
-    //     // healthyThresholdCount: 2,
-    //     // unhealthyThresholdCount: 6,
-    //     // timeout: Duration.seconds(10),
-    //     // interval: Duration.seconds(15),
-    //   },
-    // });
-  }
-
 
   /**
    * Setup a basic log group for this service's logs
@@ -213,6 +186,26 @@ export class EcsFargateService extends Construct {
 
     service.node.addDependency(props.ecsCluster);
     return service;
+  }
+
+  setupContainerMonitoring(props: EcsFargateServiceProps) {
+    new cloudwatch.Alarm(this, `${props.serviceName}-cpu-util-alarm`, {
+      metric: this.service.metricCpuUtilization(),
+      alarmDescription: `Alarm on CPU utilization for ${props.serviceName}`,
+      threshold: ALARM_THRESHOLD,
+      evaluationPeriods: ALARM_EVAL_PERIODS,
+      datapointsToAlarm: ALARM_DATA_POINTS,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+    });
+
+    new cloudwatch.Alarm(this, `${props.serviceName}-memory-util-alarm`, {
+      metric: this.service.metricMemoryUtilization(),
+      alarmDescription: `Alarm on memory utilization for ${props.serviceName}`,
+      threshold: ALARM_THRESHOLD,
+      evaluationPeriods: ALARM_EVAL_PERIODS,
+      datapointsToAlarm: ALARM_DATA_POINTS,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+    });
   }
 
 }
