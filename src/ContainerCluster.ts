@@ -317,9 +317,11 @@ export class ContainerClusterStack extends Stack {
       },
     });
 
+    const containerPort = 8080;
+
     // Allow traffic to the container
     const sg = new SecurityGroup(this, 'issue-service-sg', { vpc });
-    sg.addIngressRule(ec2.Peer.securityGroupId(vpcLinkSecurityGroup.securityGroupId), ec2.Port.tcp(80));
+    sg.addIngressRule(ec2.Peer.securityGroupId(vpcLinkSecurityGroup.securityGroupId), ec2.Port.tcp(containerPort));
 
     // Get secrets
     const apiKey = Secret.fromSecretNameV2(this, 'api-key', Statics.secretsApiKey);
@@ -328,7 +330,7 @@ export class ContainerClusterStack extends Stack {
     const service = new EcsFargateService(this, 'issue-service', {
       serviceName: 'yivi-issue',
       containerImage: image,
-      containerPort: 80,
+      containerPort: containerPort,
       ecsCluster: cluster,
       serviceListnerPath: '/irma',
       desiredtaskcount: 1,

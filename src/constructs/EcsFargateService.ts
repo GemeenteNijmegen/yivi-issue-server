@@ -46,7 +46,7 @@ export interface EcsFargateServiceProps {
   containerImage: ecs.ContainerImage;
 
   /**
-   * Container listing port
+   * Container port to open
    */
   containerPort: number;
 
