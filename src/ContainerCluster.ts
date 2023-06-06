@@ -352,6 +352,7 @@ export class ContainerClusterStack extends Stack {
     // Setup an integration for the API gateway to find the task in this ecs service
     return new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', cloudMapsService, {
       vpcLink,
+      parameterMapping: new apigatewayv2.ParameterMapping().appendHeader('Authorization', apigatewayv2.MappingValue.requestHeader('Irma-Authorization')),
       // parameterMapping cannote be used for the authorization header as it is reserved
       // We'll have to figure that one out in the container itself.
     });
