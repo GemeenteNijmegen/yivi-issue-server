@@ -1,6 +1,3 @@
-import * as apigatewayv2 from '@aws-cdk/aws-apigatewayv2-alpha';
-import * as apigatewayv2Authorizers from '@aws-cdk/aws-apigatewayv2-authorizers-alpha';
-import * as apigatewayv2Integrations from '@aws-cdk/aws-apigatewayv2-integrations-alpha';
 import {
   Stack, Fn, Aws, StackProps,
   aws_ecs as ecs,
@@ -11,14 +8,12 @@ import {
   aws_route53_targets as route53Targets,
   aws_certificatemanager as acm,
   aws_kms as kms,
-  aws_servicediscovery as servicediscovery,
+  aws_apigateway as apigateway,
   aws_iam as iam,
-  aws_apigatewayv2 as cdkApigatewayV2,
   aws_logs as logs,
   aws_ecr as ecr,
   Duration,
 } from 'aws-cdk-lib';
-import { SecurityGroup } from 'aws-cdk-lib/aws-ec2';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
@@ -29,39 +24,39 @@ export interface ContainerClusterStackProps extends StackProps, Configurable { }
 
 export class ContainerClusterStack extends Stack {
 
+  private hostedzone: route53.IHostedZone;
+  private vpc: ec2.IVpc;
+  private api: apigateway.RestApi;
+
   constructor(scope: Construct, id: string, props: ContainerClusterStackProps) {
     super(scope, id, props);
 
-    const hostedzone = this.importHostedZone();
-    const vpc = this.setupVpc();
-    const namespace = this.setupCloudMap(vpc);
-    const cluster = this.constructEcsCluster(vpc);
+    this.hostedzone = this.importHostedZone();
+    this.vpc = this.setupVpc();
+    const cluster = this.constructEcsCluster();
+    const loadbalancer = this.setupLoadbalancer();
+    const listner = this.setupListner(loadbalancer);
 
     // API Gateway and access to VPC
-    const api = this.setupApiGateway(hostedzone);
-    const vpcLinkSecurityGroup = this.setupVpcLinkSecurityGroup(vpc);
-    const vpcLink = this.setupVpcLink(vpc, vpcLinkSecurityGroup);
+    this.api = this.setupApiGateway();
+    const vpcLink = this.setupVpcLink(loadbalancer);
 
     // Setup services and api gateway routes
     const yiviIssueIntegration = this.addIssueServiceAndIntegration(
       cluster,
-      namespace,
       vpcLink,
-      vpc,
-      vpcLinkSecurityGroup,
       props,
-      hostedzone,
+      listner,
     );
-    this.setupApiRoutes(api, yiviIssueIntegration, props);
+
+    this.setupApiRoutes(yiviIssueIntegration, props);
 
   }
 
   setupApiRoutes(
-    api: apigatewayv2.HttpApi,
-    integration: apigatewayv2Integrations.HttpServiceDiscoveryIntegration,
+    integration: apigateway.Integration,
     props: ContainerClusterStackProps,
   ) {
-
 
     const allowInvokePrincipals = props.configuration.sessionEndpointAllowList.map(arn => new iam.ArnPrincipal(arn));
 
@@ -72,55 +67,38 @@ export class ContainerClusterStack extends Stack {
     }
 
     // Public
-    api.addRoutes({
-      authorizer: new apigatewayv2.HttpNoneAuthorizer(),
-      path: '/irma/{proxy+}',
-      methods: [apigatewayv2.HttpMethod.ANY],
-      integration: integration,
+    const irma = this.api.root.addResource('irma');
+    irma.addProxy({
+      defaultIntegration: integration,
+      defaultMethodOptions: {
+        authorizationType: apigateway.AuthorizationType.NONE,
+      },
     });
-
-    const authorizer = new apigatewayv2Authorizers.HttpIamAuthorizer();
 
     // Private paths below
-    api.addRoutes({
-      authorizer,
-      path: '/session',
-      methods: [apigatewayv2.HttpMethod.POST],
-      integration: integration,
+    const session = this.api.root.addResource('session');
+    const sessionToken = session.addResource('{token}');
+
+    // POST /session
+    session.addMethod('POST', integration, {
+      authorizationType: apigateway.AuthorizationType.IAM,
     });
 
-    api.addRoutes({
-      authorizer,
-      path: '/session/{token}',
-      methods: [apigatewayv2.HttpMethod.DELETE],
-      integration: integration,
+    // DELETE /session/{token}
+    sessionToken.addMethod('DELETE', integration, {
+      authorizationType: apigateway.AuthorizationType.IAM,
     });
 
-    api.addRoutes({
-      authorizer,
-      path: '/session/{token}/result',
-      methods: [apigatewayv2.HttpMethod.GET],
-      integration: integration,
+    // GET /session/{token}/result
+    sessionToken.addResource('result').addMethod('GET', integration, {
+      authorizationType: apigateway.AuthorizationType.IAM,
     });
 
-    api.addRoutes({
-      authorizer,
-      path: '/session/{token}/status',
-      methods: [apigatewayv2.HttpMethod.GET],
-      integration: integration,
+    // GET /session/{token}/status
+    sessionToken.addResource('status').addMethod('GET', integration, {
+      authorizationType: apigateway.AuthorizationType.IAM,
     });
 
-    const region = Stack.of(this).region;
-    const account = Stack.of(this).account;
-    const invokeArn = `arn:aws:execute-api:${region}:${account}:${api.apiId}/*/*/session*`;
-
-    if (user) {
-      user.addToPolicy(new iam.PolicyStatement({
-        effect: iam.Effect.ALLOW,
-        actions: ['execute-api:Invoke'],
-        resources: [invokeArn],
-      }));
-    }
 
   }
 
@@ -146,17 +124,11 @@ export class ContainerClusterStack extends Stack {
     return vpc;
   }
 
-  setupVpcLinkSecurityGroup(vpc: ec2.IVpc) {
-    const sg = new ec2.SecurityGroup(this, 'vpc-link-sg', {
-      vpc,
-      allowAllOutbound: true,
+  setupVpcLink(loadbalancer: loadbalancing.INetworkLoadBalancer) {
+    return new apigateway.VpcLink(this, 'vpc-link', {
+      description: 'Link between RestApi and private subnets in VPC (yivi issue server)',
+      targets: [loadbalancer],
     });
-    sg.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(80));
-    return sg;
-  }
-
-  setupVpcLink(vpc: ec2.IVpc, securityGroup: ec2.ISecurityGroup) {
-    return new apigatewayv2.VpcLink(this, 'vpc-link', { vpc, securityGroups: [securityGroup] });
   }
 
   importHostedZone() {
@@ -168,134 +140,128 @@ export class ContainerClusterStack extends Stack {
     });
   }
 
-  setupCloudMap(vpc: ec2.IVpc) {
-    return new servicediscovery.PrivateDnsNamespace(this, 'cloud-map', {
-      name: 'yivi-issue.local',
-      vpc,
-    });
-  }
-
   /**
-   * Consequences of using API Gateway V2:
-   *  - Direct integration with CloudMap (no loadbalancer required)
-   *  - No intrgration with WAF
-   *  - No resource-policies for access management
-   * More differences can be found here https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vs-rest.html
-   * @param hostedzone
-   * @returns
+   * Using RestApi as this is more suiteable for us: WAF, Resource-based policies, Request mapping without reserved headers
+   * Unfortunately RestApi does not have direct integration with CloudMap for loadbalacing.
+   * Differences between HttpApi and RestApi can be found here https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vs-rest.html
+   * @returns RestApi
    */
-  setupApiGateway(hostedzone: route53.IHostedZone) {
+  setupApiGateway() {
 
     const cert = new acm.Certificate(this, 'api-cert', {
-      domainName: hostedzone.zoneName,
-      validation: acm.CertificateValidation.fromDns(hostedzone),
-    });
-
-    const domainname = new apigatewayv2.DomainName(this, 'api-domain', {
-      certificate: cert,
-      domainName: hostedzone.zoneName,
-    });
-
-    const api = new apigatewayv2.HttpApi(this, 'api', {
-      description: 'API gateway for yivi-brp issue server',
-      defaultDomainMapping: {
-        domainName: domainname,
-      },
+      domainName: this.hostedzone.zoneName,
+      validation: acm.CertificateValidation.fromDns(this.hostedzone),
     });
 
     const accessLogging = new logs.LogGroup(this, 'api-logging', {
       retention: logs.RetentionDays.ONE_WEEK, // Very short lived as we'll be using a WAF
     });
-    const defaultStage = api.defaultStage?.node.defaultChild as cdkApigatewayV2.CfnStage;
-    defaultStage.accessLogSettings = {
-      destinationArn: accessLogging.logGroupArn,
-      format: JSON.stringify({
-        requestId: '$context.requestId',
-        userAgent: '$context.identity.userAgent',
-        sourceIp: '$context.identity.sourceIp',
-        requestTime: '$context.requestTime',
-        requestTimeEpoch: '$context.requestTimeEpoch',
-        httpMethod: '$context.httpMethod',
-        path: '$context.path',
-        status: '$context.status',
-        protocol: '$context.protocol',
-        responseLength: '$context.responseLength',
-        domainName: '$context.domainName',
-        errorMessage: '$context.error.message',
-        errorType: '$context.error.responseType',
-        stage: '$context.stage',
-        integrationError: '$context.integration.error',
-        integrationStatus: '$context.integration.integrationStatus',
-        integrationLatency: '$context.integration.latency',
-        integrationRequestId: '$context.integration.requestId',
-        integrationErrorMessage: '$context.integrationErrorMessage',
-        integrationLatency2: '$context.integrationLatency',
-        integrationStatus2: '$context.integration.status',
-        integrationStatus3: '$context.integrationStatus',
-      }),
-    };
-    /*
 
-*/
-    const alias = new route53Targets.ApiGatewayv2DomainProperties(domainname.regionalDomainName, domainname.regionalHostedZoneId);
+    const api = new apigateway.RestApi(this, 'api', {
+      description: 'API gateway for yivi-brp issue server',
+      domainName: {
+        certificate: cert,
+        domainName: this.hostedzone.zoneName,
+        securityPolicy: apigateway.SecurityPolicy.TLS_1_2,
+      },
+      deployOptions: {
+        accessLogDestination: new apigateway.LogGroupLogDestination(accessLogging),
+        accessLogFormat: apigateway.AccessLogFormat.custom(
+          JSON.stringify({
+            requestId: '$context.requestId',
+            userAgent: '$context.identity.userAgent',
+            sourceIp: '$context.identity.sourceIp',
+            requestTime: '$context.requestTime',
+            requestTimeEpoch: '$context.requestTimeEpoch',
+            httpMethod: '$context.httpMethod',
+            path: '$context.path',
+            status: '$context.status',
+            protocol: '$context.protocol',
+            responseLength: '$context.responseLength',
+            domainName: '$context.domainName',
+            errorMessage: '$context.error.message',
+            errorType: '$context.error.responseType',
+            stage: '$context.stage',
+            integrationError: '$context.integration.error',
+            integrationStatus: '$context.integration.integrationStatus',
+            integrationLatency: '$context.integration.latency',
+            integrationRequestId: '$context.integration.requestId',
+            integrationErrorMessage: '$context.integrationErrorMessage',
+          }),
+        ),
+      },
+    });
+
+    // Setup DNS records
+    if (!api.domainName) {
+      throw Error('No domain name configured, cannot create alas and A record');
+    }
+    const alias = new route53Targets.ApiGatewayDomain(api.domainName);
     new route53.ARecord(this, 'api-a-record', {
-      zone: hostedzone,
+      zone: this.hostedzone,
       target: route53.RecordTarget.fromAlias(alias),
     });
 
     return api;
   }
 
-  constructEcsCluster(vpc: ec2.IVpc) {
+  /**
+   * Import the account vpc from the landingzone
+   * @returns vpc
+   */
+  constructEcsCluster() {
     // Note: if a VPC is not provided we are creating a new one for this cluster
     const cluster = new ecs.Cluster(this, 'cluster', {
-      vpc,
+      vpc: this.vpc,
       clusterName: 'yivi-issue-cluster',
       enableFargateCapacityProviders: true, // Allows usage of spot instances
     });
 
-
-    vpc.node.addDependency(cluster);
+    this.vpc.node.addDependency(cluster);
 
     return cluster;
   }
 
-  setupLoadbalancer(vpc: ec2.IVpc, hostedzone: route53.IHostedZone) {
-
-    // Get a certificate
-    const albWebFormsDomainName = `alb.${hostedzone.zoneName}`;
-    const albCertificate = new acm.Certificate(this, 'loadbalancer-certificate', {
-      domainName: albWebFormsDomainName,
-      validation: acm.CertificateValidation.fromDns(hostedzone),
-    });
+  setupLoadbalancer() {
 
     // Construct the loadbalancer
-    const loadbalancer = new loadbalancing.ApplicationLoadBalancer(this, 'loadbalancer', {
-      vpc,
+    const loadbalancer = new loadbalancing.NetworkLoadBalancer(this, 'loadbalancer', {
+      vpc: this.vpc,
       internetFacing: false,
-      dropInvalidHeaderFields: true,
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+      },
+    });
+
+    this.vpc.node.addDependency(loadbalancer);
+    return loadbalancer;
+  }
+
+  setupListner(loadbalancer: loadbalancing.NetworkLoadBalancer) {
+
+    // Get a certificate
+    const albWebFormsDomainName = `alb.${this.hostedzone.zoneName}`;
+    const albCertificate = new acm.Certificate(this, 'loadbalancer-certificate', {
+      domainName: albWebFormsDomainName,
+      validation: acm.CertificateValidation.fromDns(this.hostedzone),
     });
 
     // Setup a https listner
     const listner = loadbalancer.addListener('https', {
       certificates: [albCertificate],
-      protocol: loadbalancing.ApplicationProtocol.HTTPS,
+      protocol: loadbalancing.Protocol.TLS,
       sslPolicy: loadbalancing.SslPolicy.FORWARD_SECRECY_TLS12_RES,
-      defaultAction: loadbalancing.ListenerAction.fixedResponse(404, { messageBody: 'not found ALB' }),
+      port: 443,
     });
 
-    vpc.node.addDependency(loadbalancer);
     return listner;
   }
 
   addIssueServiceAndIntegration(
     cluster: ecs.Cluster,
-    namespace: servicediscovery.PrivateDnsNamespace,
-    vpcLink: apigatewayv2.VpcLink,
-    vpc: ec2.IVpc,
-    vpcLinkSecurityGroup: ec2.SecurityGroup,
+    vpcLink: apigateway.VpcLink,
     props: ContainerClusterStackProps,
-    hostedzone: route53.IHostedZone,
+    listner: loadbalancing.NetworkListener,
   ) {
 
     // Define the image to use for the service
@@ -303,25 +269,15 @@ export class ContainerClusterStack extends Stack {
     const account = props.configuration.deployFromEnvironment.account;
     const branch = props.configuration.branchName;
     const ecrRepositoryArn = `arn:aws:ecr:${region}:${account}:repository/yivi-issue-server-${branch}`;
-    const ecrRepository = ecr.Repository.fromRepositoryArn(this, 'repository', ecrRepositoryArn );
+    const ecrRepository = ecr.Repository.fromRepositoryArn(this, 'repository', ecrRepositoryArn);
     //const image = ecs.ContainerImage.fromRegistry('nginxdemos/hello');
     const image = ecs.ContainerImage.fromEcrRepository(ecrRepository);
-
-    // Make sure the service can be reached by the API gateway via CloudMap
-    const cloudMapsService = namespace.createService('yivi-issue-service', {
-      description: 'CloudMap for yivi-issue-service',
-      dnsRecordType: servicediscovery.DnsRecordType.SRV, // Only supported
-      dnsTtl: Duration.seconds(10), // Max 10 seconds downtime?
-      customHealthCheck: { // By setting custom health checks object we use ECS health check status!
-        failureThreshold: 1,
-      },
-    });
 
     const containerPort = 8080;
 
     // Allow traffic to the container
-    const sg = new SecurityGroup(this, 'issue-service-sg', { vpc });
-    sg.addIngressRule(ec2.Peer.securityGroupId(vpcLinkSecurityGroup.securityGroupId), ec2.Port.tcp(containerPort));
+    // const sg = new SecurityGroup(this, 'issue-service-sg', { vpc: this.vpc });
+    // sg.addIngressRule(ec2.Peer.securityGroupId(vpcLinkSecurityGroup.securityGroupId), ec2.Port.tcp(containerPort));
 
     // Get secrets
     const apiKey = Secret.fromSecretNameV2(this, 'api-key', Statics.secretsApiKey);
@@ -332,17 +288,16 @@ export class ContainerClusterStack extends Stack {
       containerImage: image,
       containerPort: containerPort,
       ecsCluster: cluster,
-      serviceListnerPath: '/irma',
       desiredtaskcount: 1,
       useSpotInstances: true,
       healthCheckCommand: '/tmp/health_check.sh',
-      cloudMapsService,
-      securityGroups: [sg],
+      listner: listner,
+      securityGroups: undefined,
       secrets: {
         IRMA_TOKEN: ecs.Secret.fromSecretsManager(apiKey),
       },
       environment: {
-        IRMA_GW_URL: hostedzone.zoneName, // protocol prefix is added in the container
+        IRMA_GW_URL: this.hostedzone.zoneName, // protocol prefix is added in the container
         IRMA_GEMEENTE_PRIVKEY: 'temp',
       },
     });
@@ -350,11 +305,16 @@ export class ContainerClusterStack extends Stack {
     apiKey.grantRead(service.service.taskDefinition.taskRole);
 
     // Setup an integration for the API gateway to find the task in this ecs service
-    return new apigatewayv2Integrations.HttpServiceDiscoveryIntegration('api-integration', cloudMapsService, {
-      vpcLink,
-      parameterMapping: new apigatewayv2.ParameterMapping().appendHeader('Authorization', apigatewayv2.MappingValue.requestHeader('Irma-Authorization')),
-      // parameterMapping cannote be used for the authorization header as it is reserved
-      // We'll have to figure that one out in the container itself.
+    return new apigateway.Integration({
+      type: apigateway.IntegrationType.HTTP_PROXY,
+      integrationHttpMethod: 'ANY',
+      options: {
+        requestParameters: {
+          from: 'to', // TODO fix this
+        },
+        vpcLink: vpcLink,
+        timeout: Duration.seconds(6),
+      },
     });
 
   }

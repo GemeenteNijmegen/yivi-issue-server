@@ -3,9 +3,9 @@ import {
   aws_ecs as ecs,
   aws_secretsmanager as secrets,
   aws_cloudwatch as cloudwatch,
+  aws_elasticloadbalancingv2 as loadbalancing,
 } from 'aws-cdk-lib';
 import { SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
-import { IService } from 'aws-cdk-lib/aws-servicediscovery';
 import { Construct } from 'constructs';
 
 const ALARM_THRESHOLD = 70;
@@ -33,7 +33,7 @@ export interface EcsFargateServiceProps {
   /**
    * The loadbalancer listner to which to connect this service
    */
-  //listner: loadbalancing.IApplicationListener;
+  listner: loadbalancing.NetworkListener;
 
   /**
    * Desired numer of tasks that should run in this service.
@@ -51,13 +51,6 @@ export interface EcsFargateServiceProps {
   containerPort: number;
 
   /**
-   * Service listner path
-   * (i.e. the path that the loadbalancer will use for this service)
-   * Example: '/api/*'
-   */
-  serviceListnerPath: string;
-
-  /**
    * Indicator if sport instances should be used for
    * running the tasks on fargate
    */
@@ -69,11 +62,6 @@ export interface EcsFargateServiceProps {
    * Example 'wget localhost:80/irma -O /dev/null -q || exit 1'
    */
   healthCheckCommand: string;
-
-  /**
-   * CloudMap Service to register the task instances for loadbalancing
-   */
-  cloudMapsService: IService;
 
   /**
    * Provide security groups for this service
@@ -89,8 +77,8 @@ export interface EcsFargateServiceProps {
    * Environment variables to pass to the container on startup
    */
   environment?: { [key: string]: string };
-}
 
+}
 
 /**
  * The ecs fargate service construct:
@@ -114,8 +102,24 @@ export class EcsFargateService extends Construct {
     // Task, service and expose to loadbalancer
     const task = this.setupTaskDefinition(logGroup, props);
     this.service = this.setupFargateService(task, props);
+    this.setupLoadbalancingTarget(props);
     this.setupContainerMonitoring(props);
 
+  }
+
+  /**
+   * Take the ECS service and add is to the loadbalancer target group
+   * @param props 
+   */
+  setupLoadbalancingTarget(props: EcsFargateServiceProps) {
+    const targetGroup = new loadbalancing.NetworkTargetGroup(this, 'targets', {
+      vpc: props.ecsCluster.vpc,
+      port: 8080,
+      healthCheck: {
+        enabled: true,
+      },
+    });
+    props.listner.addTargetGroups(props.serviceName, targetGroup);
   }
 
   /**
@@ -185,9 +189,6 @@ export class EcsFargateService extends Construct {
       securityGroups: props.securityGroups,
     });
 
-    service.associateCloudMapService({
-      service: props.cloudMapsService,
-    });
 
     service.node.addDependency(props.ecsCluster);
     return service;
