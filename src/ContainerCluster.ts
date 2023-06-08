@@ -281,6 +281,13 @@ export class ContainerClusterStack extends Stack {
     // Get secrets
     const apiKey = Secret.fromSecretNameV2(this, 'api-key', Statics.secretsApiKey);
 
+    const serviceSecurityGroup = new ec2.SecurityGroup(this, 'issue-service-sg', {
+      vpc: this.vpc,
+      description: 'Security group for the yivi-issue-server',
+      allowAllOutbound: true,
+    });
+    serviceSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(containerPort));
+
     // Create the service
     const service = new EcsFargateService(this, 'issue-service', {
       serviceName: 'yivi-issue',
@@ -291,7 +298,7 @@ export class ContainerClusterStack extends Stack {
       useSpotInstances: true,
       healthCheckCommand: '/tmp/health_check.sh',
       listner: listner,
-      securityGroups: undefined,
+      securityGroups: [serviceSecurityGroup],
       secrets: {
         IRMA_TOKEN: ecs.Secret.fromSecretsManager(apiKey),
       },

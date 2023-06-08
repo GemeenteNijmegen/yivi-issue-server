@@ -117,6 +117,8 @@ export class EcsFargateService extends Construct {
       port: 8080,
       healthCheck: {
         enabled: true,
+        port: '8080',
+        protocol: loadbalancing.Protocol.TCP,
       },
     });
     props.listner.addTargetGroups(props.serviceName, targetGroup);
@@ -129,7 +131,7 @@ export class EcsFargateService extends Construct {
    */
   private logGroup(props: EcsFargateServiceProps) {
     const logGroup = new logs.LogGroup(this, `${props.serviceName}-logs`, {
-      retention: logs.RetentionDays.ONE_DAY, // TODO Very short lived (no need to keep demo stuff)
+      retention: logs.RetentionDays.ONE_MONTH,
     });
     return logGroup;
   }
@@ -157,9 +159,9 @@ export class EcsFargateService extends Construct {
         containerPort: props.containerPort,
       }],
       readonlyRootFilesystem: false,
-      healthCheck: {
-        command: ['CMD-SHELL', props.healthCheckCommand],
-      },
+      // healthCheck: { // Ignored when using a networkloadbalancer
+      //   command: ['CMD-SHELL', props.healthCheckCommand],
+      // },
       secrets: props.secrets,
       environment: props.environment,
     });
