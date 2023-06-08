@@ -35,7 +35,7 @@ export class SecretsStack extends Stack {
     const policy = new iam.ManagedPolicy(this, 'private-key-admin-policy', {
       managedPolicyName: 'yivi-private-key-admin-policy',
       description: 'Policy for YIVI private key admin',
-    })
+    });
 
     const key = new kms.Key(this, 'key', {
       policy: new iam.PolicyDocument({

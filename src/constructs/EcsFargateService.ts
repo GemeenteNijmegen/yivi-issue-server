@@ -120,6 +120,7 @@ export class EcsFargateService extends Construct {
       },
     });
     props.listner.addTargetGroups(props.serviceName, targetGroup);
+    targetGroup.addTarget(this.service);
   }
 
   /**
