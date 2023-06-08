@@ -307,7 +307,7 @@ export class ContainerClusterStack extends Stack {
     return new apigateway.Integration({
       type: apigateway.IntegrationType.HTTP_PROXY,
       integrationHttpMethod: 'ANY',
-      uri: `https://${this.hostedzone.zoneName}/`,
+      uri: `https://alb.${this.hostedzone.zoneName}/`,
       options: {
         vpcLink: vpcLink,
         timeout: Duration.seconds(6),

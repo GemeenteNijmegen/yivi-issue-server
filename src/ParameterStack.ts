@@ -30,14 +30,19 @@ export class SecretsStack extends Stack {
   }
 
 
-
   createYiviKey() {
+
+    const policy = new iam.ManagedPolicy(this, 'private-key-admin-policy', {
+      managedPolicyName: 'yivi-private-key-admin-policy',
+      description: 'Policy for YIVI private key admin',
+    })
+
     const key = new kms.Key(this, 'key', {
       policy: new iam.PolicyDocument({
         statements: [
 
           new iam.PolicyStatement({
-            sid: 'AllowAttachmentOfPersistentResources',
+            sid: 'Allow KMS key to be used by secretsmanager',
             effect: iam.Effect.ALLOW,
             principals: [new iam.AnyPrincipal()],
             resources: ['*'],
@@ -56,11 +61,11 @@ export class SecretsStack extends Stack {
           }),
           new iam.PolicyStatement(
             {
-              sid: 'Allow use of the key',
+              sid: 'Allow KMS key to be access by ECS and private key admin',
               effect: iam.Effect.ALLOW,
               principals: [
                 new iam.ArnPrincipal('irma_ecs_role'), // TODO get role ARN
-                new iam.ArnPrincipal('irma_key_admin'), // TODO get irma key admin ARN
+                new iam.ArnPrincipal(policy.managedPolicyArn),
               ],
               actions: [
                 'kms:Encrypt',
@@ -74,11 +79,10 @@ export class SecretsStack extends Stack {
           ),
         ],
       }),
-      // admins: [] // TODO check who can be admins?
     });
 
     new kms.Alias(this, 'alias', {
-      aliasName: 'yivi-issue-key',
+      aliasName: 'yivi-private-key',
       targetKey: key,
     });
 

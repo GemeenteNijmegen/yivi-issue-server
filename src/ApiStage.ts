@@ -15,9 +15,9 @@ export class ApiStage extends Stage {
 
     Aspects.of(this).add(new PermissionsBoundaryAspect('/', 'landingzone-workload-permissions-boundary'));
 
-    const parameterStack = new SecretsStack(this, 'parameter-stack', {
+    const secretsStack = new SecretsStack(this, 'parameter-stack', {
       env: props.configuration.deployToEnvironment,
-      description: 'Parameters and secrets for yivi-issue-server',
+      description: 'Secret for yivi-issue-server (including private key alarms)',
     });
 
     const dnsStack = new DnsStack(this, 'dns-stack', {
@@ -30,7 +30,7 @@ export class ApiStage extends Stage {
       description: 'ecs cluster and services for yivi-issue-server',
       configuration: props.configuration,
     });
-    cluster.addDependency(parameterStack);
+    cluster.addDependency(secretsStack);
     cluster.addDependency(dnsStack);
   }
 }
