@@ -286,7 +286,10 @@ export class ContainerClusterStack extends Stack {
       description: 'Security group for the yivi-issue-server',
       allowAllOutbound: true,
     });
-    serviceSecurityGroup.addIngressRule(ec2.Peer.anyIpv4(), ec2.Port.tcp(containerPort));
+    this.vpc.privateSubnets.forEach(subnet => {
+      const peer = ec2.Peer.ipv4(subnet.ipv4CidrBlock);
+      serviceSecurityGroup.addIngressRule(peer, ec2.Port.tcp(containerPort), `Allow traffic from private subnet in ${subnet.availabilityZone}`);
+    });
 
     // Create the service
     const service = new EcsFargateService(this, 'issue-service', {
