@@ -286,9 +286,10 @@ export class ContainerClusterStack extends Stack {
       description: 'Security group for the yivi-issue-server',
       allowAllOutbound: true,
     });
-    this.vpc.privateSubnets.forEach(subnet => {
-      const peer = ec2.Peer.ipv4(subnet.ipv4CidrBlock);
-      serviceSecurityGroup.addIngressRule(peer, ec2.Port.tcp(containerPort), `Allow traffic from private subnet in ${subnet.availabilityZone}`);
+    const privateSubnetCidrs = [1, 2, 3].map(i => ssm.StringParameter.valueForStringParameter(this, `/landingzone/vpc/private-subnet-${i}-cidr`));
+    privateSubnetCidrs.forEach(cidr => {
+      const peer = ec2.Peer.ipv4(cidr);
+      serviceSecurityGroup.addIngressRule(peer, ec2.Port.tcp(containerPort));
     });
 
     // Create the service
