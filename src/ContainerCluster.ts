@@ -39,7 +39,7 @@ export class ContainerClusterStack extends Stack {
 
     // API Gateway and access to VPC
     this.api = this.setupApiGateway();
-    //const vpcLink = this.setupVpcLink(loadbalancer);
+    this.setupVpcLink(loadbalancer);
 
     // // Setup services and api gateway routes
     // const yiviIssueIntegration = this.addIssueServiceAndIntegration(
