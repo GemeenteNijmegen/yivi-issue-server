@@ -40,20 +40,14 @@ export class ContainerClusterStack extends Stack {
     this.api = this.setupApiGateway();
     const vpclink = this.setupVpcLink(loadbalancer);
 
-    // // Setup services and api gateway routes
-    const yiviIssueIntegration = this.addIssueServiceAndIntegration(
-      cluster,
-      vpclink,
-      props,
-      listner,
-    );
-
-    this.setupApiRoutes(yiviIssueIntegration, props);
+    // Setup services and api gateway routes
+    this.addIssueServiceAndIntegration(cluster, props, listner);
+    this.setupApiRoutes(vpclink, props);
 
   }
 
   setupApiRoutes(
-    integration: apigateway.Integration,
+    vpclink: apigateway.VpcLink,
     props: ContainerClusterStackProps,
   ) {
 
@@ -66,9 +60,21 @@ export class ContainerClusterStack extends Stack {
     }
 
     // Public
+    const irmaIntegration = new apigateway.Integration({
+      type: apigateway.IntegrationType.HTTP_PROXY,
+      integrationHttpMethod: 'ANY',
+      uri: `https://alb.${this.hostedzone.zoneName}/irma/{proxy}`,
+      options: {
+        vpcLink: vpclink,
+        timeout: Duration.seconds(6),
+        requestParameters: {
+          'integration.request.path.proxy': 'method.request.path.proxy',
+        },
+      },
+    });
     const irma = this.api.root.addResource('irma');
     irma.addProxy({
-      defaultIntegration: integration,
+      defaultIntegration: irmaIntegration,
       defaultMethodOptions: {
         authorizationType: apigateway.AuthorizationType.NONE,
       },
@@ -79,25 +85,49 @@ export class ContainerClusterStack extends Stack {
     const sessionToken = session.addResource('{token}');
 
     // POST /session
-    session.addMethod('POST', integration, {
+    const sessionIntegration = new apigateway.Integration({
+      type: apigateway.IntegrationType.HTTP_PROXY,
+      integrationHttpMethod: 'ANY',
+      uri: `https://alb.${this.hostedzone.zoneName}/session`,
+      options: {
+        vpcLink: vpclink,
+        timeout: Duration.seconds(6),
+        requestParameters: {
+          'integration.request.header.authorization': 'method.request.header.irma-authorization',
+        },
+      },
+    });
+    session.addMethod('POST', sessionIntegration, {
       authorizationType: apigateway.AuthorizationType.IAM,
     });
 
     // DELETE /session/{token}
-    sessionToken.addMethod('DELETE', integration, {
-      authorizationType: apigateway.AuthorizationType.IAM,
-    });
+    // sessionToken.addMethod('DELETE', integration, {
+    //   authorizationType: apigateway.AuthorizationType.IAM,
+    // });
 
     // GET /session/{token}/result
-    sessionToken.addResource('result').addMethod('GET', integration, {
-      authorizationType: apigateway.AuthorizationType.IAM,
-    });
+    // sessionToken.addResource('result').addMethod('GET', integration, {
+    //   authorizationType: apigateway.AuthorizationType.IAM,
+    // });
 
     // GET /session/{token}/status
-    sessionToken.addResource('status').addMethod('GET', integration, {
+    const statusIntegration = new apigateway.Integration({
+      type: apigateway.IntegrationType.HTTP_PROXY,
+      integrationHttpMethod: 'ANY',
+      uri: `https://alb.${this.hostedzone.zoneName}/session/{token}/status`,
+      options: {
+        vpcLink: vpclink,
+        timeout: Duration.seconds(6),
+        requestParameters: {
+          'integration.request.header.authorization': 'method.request.header.irma-authorization',
+          'integration.request.path.token': 'method.request.path.token',
+        },
+      },
+    });
+    sessionToken.addResource('status').addMethod('GET', statusIntegration, {
       authorizationType: apigateway.AuthorizationType.IAM,
     });
-
 
   }
 
@@ -258,7 +288,6 @@ export class ContainerClusterStack extends Stack {
 
   addIssueServiceAndIntegration(
     cluster: ecs.Cluster,
-    vpcLink: apigateway.VpcLink,
     props: ContainerClusterStackProps,
     listner: loadbalancing.NetworkListener,
   ) {
@@ -313,17 +342,6 @@ export class ContainerClusterStack extends Stack {
     });
 
     apiKey.grantRead(service.service.taskDefinition.taskRole);
-
-    // Setup an integration for the API gateway to find the task in this ecs service
-    return new apigateway.Integration({
-      type: apigateway.IntegrationType.HTTP_PROXY,
-      integrationHttpMethod: 'ANY',
-      uri: `https://alb.${this.hostedzone.zoneName}/`,
-      options: {
-        vpcLink: vpcLink,
-        timeout: Duration.seconds(6),
-      },
-    });
 
   }
 
