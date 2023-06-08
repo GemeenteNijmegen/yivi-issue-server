@@ -33,23 +33,23 @@ export class ContainerClusterStack extends Stack {
 
     this.hostedzone = this.importHostedZone();
     this.vpc = this.setupVpc();
-    const cluster = this.constructEcsCluster();
+    this.constructEcsCluster();
     const loadbalancer = this.setupLoadbalancer();
-    const listner = this.setupListner(loadbalancer);
+    this.setupListner(loadbalancer);
 
     // API Gateway and access to VPC
     this.api = this.setupApiGateway();
-    const vpcLink = this.setupVpcLink(loadbalancer);
+    //const vpcLink = this.setupVpcLink(loadbalancer);
 
-    // Setup services and api gateway routes
-    const yiviIssueIntegration = this.addIssueServiceAndIntegration(
-      cluster,
-      vpcLink,
-      props,
-      listner,
-    );
+    // // Setup services and api gateway routes
+    // const yiviIssueIntegration = this.addIssueServiceAndIntegration(
+    //   cluster,
+    //   vpcLink,
+    //   props,
+    //   listner,
+    // );
 
-    this.setupApiRoutes(yiviIssueIntegration, props);
+    // this.setupApiRoutes(yiviIssueIntegration, props);
 
   }
 
