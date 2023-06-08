@@ -7,7 +7,6 @@ import {
   aws_route53 as route53,
   aws_route53_targets as route53Targets,
   aws_certificatemanager as acm,
-  aws_kms as kms,
   aws_apigateway as apigateway,
   aws_iam as iam,
   aws_logs as logs,
@@ -308,10 +307,8 @@ export class ContainerClusterStack extends Stack {
     return new apigateway.Integration({
       type: apigateway.IntegrationType.HTTP_PROXY,
       integrationHttpMethod: 'ANY',
+      uri: `https://${this.hostedzone.zoneName}/`,
       options: {
-        requestParameters: {
-          from: 'to', // TODO fix this
-        },
         vpcLink: vpcLink,
         timeout: Duration.seconds(6),
       },
@@ -319,57 +316,5 @@ export class ContainerClusterStack extends Stack {
 
   }
 
-  createYiviKey() {
-    const key = new kms.Key(this, 'key', {
-      policy: new iam.PolicyDocument({
-        statements: [
-
-          new iam.PolicyStatement({
-            sid: 'AllowAttachmentOfPersistentResources',
-            effect: iam.Effect.ALLOW,
-            principals: [new iam.AnyPrincipal()],
-            resources: ['*'],
-            actions: [
-              'kms:CreateGrant',
-              'kms:ListGrants',
-              'kms:RevokeGrant',
-            ],
-            conditions: [
-              {
-                Bool: {
-                  'kms:GrantIsForAWSResource': 'true',
-                },
-              },
-            ],
-          }),
-          new iam.PolicyStatement(
-            {
-              sid: 'Allow use of the key',
-              effect: iam.Effect.ALLOW,
-              principals: [
-                new iam.ArnPrincipal('irma_ecs_role'), // TODO get role ARN
-                new iam.ArnPrincipal('irma_key_admin'), // TODO get irma key admin ARN
-              ],
-              actions: [
-                'kms:Encrypt',
-                'kms:Decrypt',
-                'kms:ReEncrypt*',
-                'kms:GenerateDataKey*',
-                'kms:DescribeKey',
-              ],
-              resources: ['*'],
-            },
-          ),
-        ],
-      }),
-      // admins: [] // TODO check who can be admins?
-    });
-
-    new kms.Alias(this, 'alias', {
-      aliasName: 'yivi-issue-key',
-      targetKey: key,
-    });
-
-  }
 
 }

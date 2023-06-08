@@ -4,7 +4,7 @@ import { PermissionsBoundaryAspect } from './Aspect';
 import { Configurable } from './Configuration';
 import { ContainerClusterStack } from './ContainerCluster';
 import { DnsStack } from './DnsStack';
-import { ParameterStack } from './ParameterStack';
+import { SecretsStack } from './ParameterStack';
 
 export interface ApiStageProps extends StageProps, Configurable {}
 
@@ -15,7 +15,7 @@ export class ApiStage extends Stage {
 
     Aspects.of(this).add(new PermissionsBoundaryAspect('/', 'landingzone-workload-permissions-boundary'));
 
-    const parameterStack = new ParameterStack(this, 'parameter-stack', {
+    const parameterStack = new SecretsStack(this, 'parameter-stack', {
       env: props.configuration.deployToEnvironment,
       description: 'Parameters and secrets for yivi-issue-server',
     });
