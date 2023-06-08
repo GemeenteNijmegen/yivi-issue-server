@@ -109,7 +109,7 @@ export class EcsFargateService extends Construct {
 
   /**
    * Take the ECS service and add is to the loadbalancer target group
-   * @param props 
+   * @param props
    */
   setupLoadbalancingTarget(props: EcsFargateServiceProps) {
     const targetGroup = new loadbalancing.NetworkTargetGroup(this, 'targets', {

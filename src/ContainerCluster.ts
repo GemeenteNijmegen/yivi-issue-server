@@ -49,6 +49,8 @@ export class ContainerClusterStack extends Stack {
     //   listner,
     // );
 
+    this.api.root.addMethod('ANY');
+
     // this.setupApiRoutes(yiviIssueIntegration, props);
 
   }
@@ -246,12 +248,19 @@ export class ContainerClusterStack extends Stack {
       validation: acm.CertificateValidation.fromDns(this.hostedzone),
     });
 
+    // TODO remove after deploying ECS service
+    const group = new loadbalancing.NetworkTargetGroup(this, 'group', {
+      vpc: this.vpc,
+      port: 8080,
+    });
+
     // Setup a https listner
     const listner = loadbalancer.addListener('https', {
       certificates: [albCertificate],
       protocol: loadbalancing.Protocol.TLS,
       sslPolicy: loadbalancing.SslPolicy.FORWARD_SECRECY_TLS12_RES,
       port: 443,
+      defaultTargetGroups: [group],
     });
 
     return listner;
