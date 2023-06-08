@@ -33,25 +33,23 @@ export class ContainerClusterStack extends Stack {
 
     this.hostedzone = this.importHostedZone();
     this.vpc = this.setupVpc();
-    this.constructEcsCluster();
+    const cluster = this.constructEcsCluster();
     const loadbalancer = this.setupLoadbalancer();
-    this.setupListner(loadbalancer);
+    const listner = this.setupListner(loadbalancer);
 
     // API Gateway and access to VPC
     this.api = this.setupApiGateway();
-    this.setupVpcLink(loadbalancer);
+    const vpclink = this.setupVpcLink(loadbalancer);
 
     // // Setup services and api gateway routes
-    // const yiviIssueIntegration = this.addIssueServiceAndIntegration(
-    //   cluster,
-    //   vpcLink,
-    //   props,
-    //   listner,
-    // );
+    const yiviIssueIntegration = this.addIssueServiceAndIntegration(
+      cluster,
+      vpclink,
+      props,
+      listner,
+    );
 
-    this.api.root.addMethod('ANY');
-
-    // this.setupApiRoutes(yiviIssueIntegration, props);
+    this.setupApiRoutes(yiviIssueIntegration, props);
 
   }
 
@@ -248,19 +246,12 @@ export class ContainerClusterStack extends Stack {
       validation: acm.CertificateValidation.fromDns(this.hostedzone),
     });
 
-    // TODO remove after deploying ECS service
-    const group = new loadbalancing.NetworkTargetGroup(this, 'group', {
-      vpc: this.vpc,
-      port: 8080,
-    });
-
     // Setup a https listner
     const listner = loadbalancer.addListener('https', {
       certificates: [albCertificate],
       protocol: loadbalancing.Protocol.TLS,
       sslPolicy: loadbalancing.SslPolicy.FORWARD_SECRECY_TLS12_RES,
       port: 443,
-      defaultTargetGroups: [group],
     });
 
     return listner;

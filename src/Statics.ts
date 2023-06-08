@@ -19,6 +19,7 @@ export class Statics {
 
   static readonly secretDockerhub = '/yivi-brp-issue/pipeline/dockerhub';
   static readonly secretsApiKey = '/yivi-brp-issue/container/api-key';
+  static readonly secretsPrivateKey = '/yivi-brp-issue/container/private-key';
 
   // Environments related statics
   static readonly codeStarConnectionArn = 'arn:aws:codestar-connections:eu-central-1:836443378780:connection/9d20671d-91bc-49e2-8680-59ff96e2ab11';
