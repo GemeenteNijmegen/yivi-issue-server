@@ -77,6 +77,9 @@ export class ContainerClusterStack extends Stack {
       defaultIntegration: irmaIntegration,
       defaultMethodOptions: {
         authorizationType: apigateway.AuthorizationType.NONE,
+        requestParameters: {
+          'method.request.path.proxy': true,
+        }
       },
     });
 
@@ -99,6 +102,9 @@ export class ContainerClusterStack extends Stack {
     });
     session.addMethod('POST', sessionIntegration, {
       authorizationType: apigateway.AuthorizationType.IAM,
+      requestParameters: {
+        'method.request.header.irma-authorization': true,
+      }
     });
 
     // DELETE /session/{token}
@@ -127,6 +133,10 @@ export class ContainerClusterStack extends Stack {
     });
     sessionToken.addResource('status').addMethod('GET', statusIntegration, {
       authorizationType: apigateway.AuthorizationType.IAM,
+      requestParameters: {
+        'method.request.header.irma-authorization': true,
+        'method.request.path.token': true,
+      }
     });
 
   }
