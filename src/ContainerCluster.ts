@@ -37,27 +37,18 @@ export class ContainerClusterStack extends Stack {
     const listner = this.setupListner(loadbalancer);
 
     // API Gateway and access to VPC
-    this.api = this.setupApiGateway();
+    this.api = this.setupApiGateway(props);
     const vpclink = this.setupVpcLink(loadbalancer);
 
     // Setup services and api gateway routes
     this.addIssueServiceAndIntegration(cluster, props, listner);
-    this.setupApiRoutes(vpclink, props);
+    this.setupApiRoutes(vpclink);
 
   }
 
   setupApiRoutes(
     vpclink: apigateway.VpcLink,
-    props: ContainerClusterStackProps,
   ) {
-
-    const allowInvokePrincipals = props.configuration.sessionEndpointAllowList.map(arn => new iam.ArnPrincipal(arn));
-
-    let user = undefined;
-    if (props.configuration.sessionEndpointIamUser) {
-      user = new iam.User(this, 'yivi-api-user', {});
-      allowInvokePrincipals.push(new iam.ArnPrincipal(user.userArn));
-    }
 
     // Public
     const irmaIntegration = new apigateway.Integration({
@@ -79,7 +70,7 @@ export class ContainerClusterStack extends Stack {
         authorizationType: apigateway.AuthorizationType.NONE,
         requestParameters: {
           'method.request.path.proxy': true,
-        }
+        },
       },
     });
 
@@ -104,24 +95,14 @@ export class ContainerClusterStack extends Stack {
       authorizationType: apigateway.AuthorizationType.IAM,
       requestParameters: {
         'method.request.header.irma-authorization': true,
-      }
+      },
     });
 
-    // DELETE /session/{token}
-    // sessionToken.addMethod('DELETE', integration, {
-    //   authorizationType: apigateway.AuthorizationType.IAM,
-    // });
-
-    // GET /session/{token}/result
-    // sessionToken.addResource('result').addMethod('GET', integration, {
-    //   authorizationType: apigateway.AuthorizationType.IAM,
-    // });
-
-    // GET /session/{token}/status
-    const statusIntegration = new apigateway.Integration({
+    // DELETE /session/{token} (NOT USED)
+    const tokenIntegration = new apigateway.Integration({
       type: apigateway.IntegrationType.HTTP_PROXY,
       integrationHttpMethod: 'ANY',
-      uri: `https://alb.${this.hostedzone.zoneName}/session/{token}/status`,
+      uri: `https://alb.${this.hostedzone.zoneName}/session/{token}`,
       options: {
         vpcLink: vpclink,
         timeout: Duration.seconds(6),
@@ -131,13 +112,57 @@ export class ContainerClusterStack extends Stack {
         },
       },
     });
-    sessionToken.addResource('status').addMethod('GET', statusIntegration, {
+    sessionToken.addMethod('DELETE', tokenIntegration, {
       authorizationType: apigateway.AuthorizationType.IAM,
       requestParameters: {
         'method.request.header.irma-authorization': true,
         'method.request.path.token': true,
-      }
+      },
     });
+
+    // GET /session/{token}/result (NOT USED)
+    // const resultIntegration = new apigateway.Integration({
+    //   type: apigateway.IntegrationType.HTTP_PROXY,
+    //   integrationHttpMethod: 'ANY',
+    //   uri: `https://alb.${this.hostedzone.zoneName}/session/{token}/result`,
+    //   options: {
+    //     vpcLink: vpclink,
+    //     timeout: Duration.seconds(6),
+    //     requestParameters: {
+    //       'integration.request.header.authorization': 'method.request.header.irma-authorization',
+    //       'integration.request.path.token': 'method.request.path.token',
+    //     },
+    //   },
+    // });
+    // sessionToken.addResource('result').addMethod('GET', resultIntegration, {
+    //   authorizationType: apigateway.AuthorizationType.IAM,
+    //   requestParameters: {
+    //     'method.request.header.irma-authorization': true,
+    //     'method.request.path.token': true,
+    //   }
+    // });
+
+    // GET /session/{token}/status (NOT USED)
+    // const statusIntegration = new apigateway.Integration({
+    //   type: apigateway.IntegrationType.HTTP_PROXY,
+    //   integrationHttpMethod: 'ANY',
+    //   uri: `https://alb.${this.hostedzone.zoneName}/session/{token}/status`,
+    //   options: {
+    //     vpcLink: vpclink,
+    //     timeout: Duration.seconds(6),
+    //     requestParameters: {
+    //       'integration.request.header.authorization': 'method.request.header.irma-authorization',
+    //       'integration.request.path.token': 'method.request.path.token',
+    //     },
+    //   },
+    // });
+    // sessionToken.addResource('status').addMethod('GET', statusIntegration, {
+    //   authorizationType: apigateway.AuthorizationType.IAM,
+    //   requestParameters: {
+    //     'method.request.header.irma-authorization': true,
+    //     'method.request.path.token': true,
+    //   }
+    // });
 
   }
 
@@ -185,7 +210,7 @@ export class ContainerClusterStack extends Stack {
    * Differences between HttpApi and RestApi can be found here https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vs-rest.html
    * @returns RestApi
    */
-  setupApiGateway() {
+  setupApiGateway(props: ContainerClusterStackProps) {
 
     const cert = new acm.Certificate(this, 'api-cert', {
       domainName: this.hostedzone.zoneName,
@@ -203,6 +228,7 @@ export class ContainerClusterStack extends Stack {
         domainName: this.hostedzone.zoneName,
         securityPolicy: apigateway.SecurityPolicy.TLS_1_2,
       },
+      policy: this.setupApiGatewayPolicy(props),
       deployOptions: {
         accessLogDestination: new apigateway.LogGroupLogDestination(accessLogging),
         accessLogFormat: apigateway.AccessLogFormat.custom(
@@ -242,6 +268,31 @@ export class ContainerClusterStack extends Stack {
     });
 
     return api;
+  }
+
+  setupApiGatewayPolicy(props: ContainerClusterStackProps) {
+    const region = Stack.of(this).region;
+    const accountId = Stack.of(this).account;
+
+    const allowInvokePrincipals = props.configuration.sessionEndpointAllowList.map(arn => new iam.ArnPrincipal(arn));
+    if (props.configuration.sessionEndpointIamUser) {
+      const user = new iam.User(this, 'yivi-api-user', {});
+      allowInvokePrincipals.push(new iam.ArnPrincipal(user.userArn));
+    }
+
+    return new iam.PolicyDocument({
+      statements: [
+        new iam.PolicyStatement({
+          actions: ['execute-api:Invoke'],
+          principals: allowInvokePrincipals,
+          effect: iam.Effect.ALLOW,
+          resources: [
+            // Only allow invokation of this single endpoint
+            `arn:aws:execute-api:${region}:${accountId}:*/prod/POST/session`,
+          ],
+        }),
+      ],
+    });
   }
 
   /**
