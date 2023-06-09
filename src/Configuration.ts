@@ -40,7 +40,7 @@ export const configurations: { [key: string]: Configuration } = {
     deployFromEnvironment: Statics.deploymentEnvironment,
     deployToEnvironment: Statics.acceptanceEnvironment,
     sessionEndpointAllowList: [
-      'arn:aws:lambda:eu-west-1:315037222840:function:yivi-issue-api-api-stack-yiviissueissuefunctionlam-k21aqrhAoP0m',
+      'arn:aws:iam::315037222840:role/yivi-issue-api-api-stack-yiviissueissuefunctionlam-13P8QZIPPJXI1',
     ],
     sessionEndpointIamUser: true,
     buildTargetEnvironment: 'accp',
