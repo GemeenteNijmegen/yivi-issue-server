@@ -20,16 +20,16 @@ export class SecretsStack extends Stack {
     });
 
     // Secret private key for YIVI issue server
-    const adminPolicy = this.createAdminPolicy();
+    //const adminPolicy = this.createAdminPolicy();
     const key = this.createYiviKey();
-    const privateKey = new secrets.Secret(this, 'private-key', {
+    new secrets.Secret(this, 'private-key', {
       secretName: Statics.secretsPrivateKey,
       description: 'Private key for YIVI issue server',
       encryptionKey: key,
     });
 
-    this.allowSecretManagement(privateKey, adminPolicy);
-    this.addToKeyPolicy(adminPolicy, key);
+    //this.allowSecretManagement(privateKey, adminPolicy);
+    //this.addToKeyPolicy(adminPolicy, key);
 
   }
 
@@ -62,7 +62,6 @@ export class SecretsStack extends Stack {
     const key = new kms.Key(this, 'key', {
       policy: new iam.PolicyDocument({
         statements: [
-
           new iam.PolicyStatement({
             sid: 'Allow KMS key to be used by secretsmanager',
             effect: iam.Effect.ALLOW,
@@ -81,7 +80,6 @@ export class SecretsStack extends Stack {
               },
             ],
           }),
-
         ],
       }),
     });
