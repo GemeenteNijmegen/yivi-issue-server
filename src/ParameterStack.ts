@@ -21,13 +21,15 @@ export class SecretsStack extends Stack {
 
     // Secret private key for YIVI issue server
     const adminPolicy = this.createAdminPolicy();
-    const key = this.createYiviKey(adminPolicy);
+    const key = this.createYiviKey();
     const privateKey = new secrets.Secret(this, 'private-key', {
       secretName: Statics.secretsPrivateKey,
       description: 'Private key for YIVI issue server',
       encryptionKey: key,
     });
+
     this.allowSecretManagement(privateKey, adminPolicy);
+    this.addToKeyPolicy(adminPolicy, key);
 
   }
 
@@ -56,8 +58,7 @@ export class SecretsStack extends Stack {
     }));
   }
 
-  createYiviKey(policy: iam.ManagedPolicy) {
-
+  createYiviKey() {
     const key = new kms.Key(this, 'key', {
       policy: new iam.PolicyDocument({
         statements: [
@@ -80,24 +81,7 @@ export class SecretsStack extends Stack {
               },
             ],
           }),
-          new iam.PolicyStatement(
-            {
-              sid: 'Allow KMS key to be access by ECS and private key admin',
-              effect: iam.Effect.ALLOW,
-              principals: [
-                //new iam.ArnPrincipal('irma_ecs_role'), // TODO get role ARN
-                new iam.ArnPrincipal(policy.managedPolicyArn),
-              ],
-              actions: [
-                'kms:Encrypt',
-                'kms:Decrypt',
-                'kms:ReEncrypt*',
-                'kms:GenerateDataKey*',
-                'kms:DescribeKey',
-              ],
-              resources: ['*'],
-            },
-          ),
+
         ],
       }),
     });
@@ -109,5 +93,25 @@ export class SecretsStack extends Stack {
 
     return key;
 
+  }
+
+  addToKeyPolicy(policy: iam.ManagedPolicy, key: kms.Key) {
+    const statement = new iam.PolicyStatement({
+      sid: 'Allow KMS key to be access by ECS and private key admin',
+      effect: iam.Effect.ALLOW,
+      principals: [
+        //new iam.ArnPrincipal('irma_ecs_role'), // TODO get role ARN
+        new iam.ArnPrincipal(policy.managedPolicyArn),
+      ],
+      actions: [
+        'kms:Encrypt',
+        'kms:Decrypt',
+        'kms:ReEncrypt*',
+        'kms:GenerateDataKey*',
+        'kms:DescribeKey',
+      ],
+      resources: ['*'],
+    });
+    key.addToResourcePolicy(statement);
   }
 }
