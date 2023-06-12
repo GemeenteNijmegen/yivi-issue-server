@@ -20,22 +20,43 @@ export class SecretsStack extends Stack {
     });
 
     // Secret private key for YIVI issue server
-    new secrets.Secret(this, 'private-key', {
+    const adminPolicy = this.createAdminPolicy();
+    const key = this.createYiviKey(adminPolicy);
+    const privateKey = new secrets.Secret(this, 'private-key', {
       secretName: Statics.secretsPrivateKey,
       description: 'Private key for YIVI issue server',
-      encryptionKey: this.createYiviKey(),
+      encryptionKey: key,
     });
-
+    this.allowSecretManagement(privateKey, adminPolicy);
 
   }
 
 
-  createYiviKey() {
-
+  createAdminPolicy() {
     const policy = new iam.ManagedPolicy(this, 'private-key-admin-policy', {
       managedPolicyName: 'yivi-private-key-admin-policy',
       description: 'Policy for YIVI private key admin',
     });
+    return policy;
+  }
+
+  allowSecretManagement(secret: secrets.Secret, policy: iam.ManagedPolicy) {
+    policy.addStatements(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'secretsmanager:Put*',
+        'secretsmanager:Update*',
+        'secretsmanager:Get*',
+        'secretsmanager:List*',
+        'secretsmanager:Describe*',
+      ],
+      resources: [
+        secret.secretArn,
+      ],
+    }));
+  }
+
+  createYiviKey(policy: iam.ManagedPolicy) {
 
     const key = new kms.Key(this, 'key', {
       policy: new iam.PolicyDocument({

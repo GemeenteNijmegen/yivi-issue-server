@@ -76,7 +76,6 @@ export class ContainerClusterStack extends Stack {
 
     // Private paths below
     const session = this.api.root.addResource('session');
-    const sessionToken = session.addResource('{token}');
 
     // POST /session
     const sessionIntegration = new apigateway.Integration({
@@ -98,27 +97,29 @@ export class ContainerClusterStack extends Stack {
       },
     });
 
+    // const sessionToken = session.addResource('{token}');
+
     // DELETE /session/{token} (NOT USED)
-    const tokenIntegration = new apigateway.Integration({
-      type: apigateway.IntegrationType.HTTP_PROXY,
-      integrationHttpMethod: 'ANY',
-      uri: `https://alb.${this.hostedzone.zoneName}/session/{token}`,
-      options: {
-        vpcLink: vpclink,
-        timeout: Duration.seconds(6),
-        requestParameters: {
-          'integration.request.header.authorization': 'method.request.header.irma-authorization',
-          'integration.request.path.token': 'method.request.path.token',
-        },
-      },
-    });
-    sessionToken.addMethod('DELETE', tokenIntegration, {
-      authorizationType: apigateway.AuthorizationType.IAM,
-      requestParameters: {
-        'method.request.header.irma-authorization': true,
-        'method.request.path.token': true,
-      },
-    });
+    // const tokenIntegration = new apigateway.Integration({
+    //   type: apigateway.IntegrationType.HTTP_PROXY,
+    //   integrationHttpMethod: 'ANY',
+    //   uri: `https://alb.${this.hostedzone.zoneName}/session/{token}`,
+    //   options: {
+    //     vpcLink: vpclink,
+    //     timeout: Duration.seconds(6),
+    //     requestParameters: {
+    //       'integration.request.header.authorization': 'method.request.header.irma-authorization',
+    //       'integration.request.path.token': 'method.request.path.token',
+    //     },
+    //   },
+    // });
+    // sessionToken.addMethod('DELETE', tokenIntegration, {
+    //   authorizationType: apigateway.AuthorizationType.IAM,
+    //   requestParameters: {
+    //     'method.request.header.irma-authorization': true,
+    //     'method.request.path.token': true,
+    //   },
+    // });
 
     // GET /session/{token}/result (NOT USED)
     // const resultIntegration = new apigateway.Integration({
@@ -293,7 +294,7 @@ export class ContainerClusterStack extends Stack {
         }),
         new iam.PolicyStatement({
           actions: ['execute-api:Invoke'],
-          principals: [ new iam.AnyPrincipal() ],
+          principals: [new iam.AnyPrincipal()],
           effect: iam.Effect.ALLOW,
           resources: [
             `arn:aws:execute-api:${region}:${accountId}:*/prod/*/irma`,
