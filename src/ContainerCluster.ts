@@ -296,7 +296,8 @@ export class ContainerClusterStack extends Stack {
           principals: [ new iam.AnyPrincipal() ],
           effect: iam.Effect.ALLOW,
           resources: [
-            `arn:aws:execute-api:${region}:${accountId}:*/prod/ANY/irma`,
+            `arn:aws:execute-api:${region}:${accountId}:*/prod/*/irma`,
+            `arn:aws:execute-api:${region}:${accountId}:*/prod/*/irma/*`,
           ],
         }),
       ],
