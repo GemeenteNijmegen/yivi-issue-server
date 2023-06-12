@@ -291,6 +291,14 @@ export class ContainerClusterStack extends Stack {
             `arn:aws:execute-api:${region}:${accountId}:*/prod/POST/session`,
           ],
         }),
+        new iam.PolicyStatement({
+          actions: ['execute-api:Invoke'],
+          principals: [ new iam.AnyPrincipal() ],
+          effect: iam.Effect.ALLOW,
+          resources: [
+            `arn:aws:execute-api:${region}:${accountId}:*/prod/ANY/irma`,
+          ],
+        }),
       ],
     });
   }
