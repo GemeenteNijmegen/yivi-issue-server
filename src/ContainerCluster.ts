@@ -378,6 +378,7 @@ export class ContainerClusterStack extends Stack {
 
     // Get secrets
     const apiKey = Secret.fromSecretNameV2(this, 'api-key', Statics.secretsApiKey);
+    const privateKey = Secret.fromSecretNameV2(this, 'private-key', Statics.secretsPrivateKey);
 
     const serviceSecurityGroup = new ec2.SecurityGroup(this, 'issue-service-sg', {
       vpc: this.vpc,
@@ -403,13 +404,14 @@ export class ContainerClusterStack extends Stack {
       securityGroups: [serviceSecurityGroup],
       secrets: {
         IRMA_TOKEN: ecs.Secret.fromSecretsManager(apiKey),
+        IRMA_GEMEENTE_PRIVKEY: ecs.Secret.fromSecretsManager(privateKey),
       },
       environment: {
         IRMA_GW_URL: this.hostedzone.zoneName, // protocol prefix is added in the container
-        IRMA_GEMEENTE_PRIVKEY: 'temp',
       },
     });
 
+    privateKey.grantRead(service.service.taskDefinition.taskRole);
     apiKey.grantRead(service.service.taskDefinition.taskRole);
 
   }

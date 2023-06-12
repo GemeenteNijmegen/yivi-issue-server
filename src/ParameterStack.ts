@@ -20,11 +20,11 @@ export class SecretsStack extends Stack {
     });
 
     // Secret private key for YIVI issue server
-    // new secrets.Secret(this, 'private-key', {
-    //   secretName: Statics.secretsPrivateKey,
-    //   description: 'Private key for YIVI issue server',
-    //   encryptionKey: this.createYiviKey(),
-    // });
+    new secrets.Secret(this, 'private-key', {
+      secretName: Statics.secretsPrivateKey,
+      description: 'Private key for YIVI issue server',
+      encryptionKey: this.createYiviKey(),
+    });
 
 
   }
@@ -64,7 +64,7 @@ export class SecretsStack extends Stack {
               sid: 'Allow KMS key to be access by ECS and private key admin',
               effect: iam.Effect.ALLOW,
               principals: [
-                new iam.ArnPrincipal('irma_ecs_role'), // TODO get role ARN
+                //new iam.ArnPrincipal('irma_ecs_role'), // TODO get role ARN
                 new iam.ArnPrincipal(policy.managedPolicyArn),
               ],
               actions: [
