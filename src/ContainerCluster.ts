@@ -415,7 +415,10 @@ export class ContainerClusterStack extends Stack {
     });
 
     // Allow role to use the protection key for accessing the secrets on startup
-    const role = service.service.taskDefinition.taskRole;
+    const role = service.service.taskDefinition.executionRole;
+    if (!role) {
+      throw Error('No task execution role defined!');
+    }
     const keyArn = ssm.StringParameter.valueForStringParameter(this, Statics.ssmProtectionKeyArn);
     const key = kms.Key.fromKeyArn(this, 'protection-key', keyArn);
     const statement = new iam.PolicyStatement({
@@ -432,9 +435,8 @@ export class ContainerClusterStack extends Stack {
       resources: ['*'],
     });
     key.addToResourcePolicy(statement);
-
-    privateKey.grantRead(service.service.taskDefinition.taskRole);
-    apiKey.grantRead(service.service.taskDefinition.taskRole);
+    privateKey.grantRead(role);
+    apiKey.grantRead(role);
 
   }
 
