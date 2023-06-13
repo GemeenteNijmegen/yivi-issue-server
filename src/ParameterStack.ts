@@ -75,13 +75,11 @@ export class SecretsStack extends Stack {
         'kms:ListGrants',
         'kms:RevokeGrant',
       ],
-      conditions: [
-        {
-          Bool: {
-            'kms:GrantIsForAWSResource': 'true',
-          },
+      conditions: {
+        Bool: {
+          'kms:GrantIsForAWSResource': 'true',
         },
-      ],
+      },
     }));
 
     new ssm.StringParameter(this, 'protection-key-arn', {
