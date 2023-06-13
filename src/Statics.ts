@@ -11,11 +11,7 @@ export class Statics {
   static readonly ssmHostedZoneName = '/yivi-brp-issue/hostedzone/name';
 
   // Parameter and secret references
-  static readonly ssmParamsPath: string = '/cdk/um-demo/ssm/';
-  static readonly ssmCertificateArn: string = '/cdk/um-demo/ssm/certificate-arn';
-  static readonly ssmCloudfrontDistributionId: string = '/cdk/um-demo/ssm/cloudfront/dist-id';
-
-  static readonly ssmLoadbalancerSecurityHeader: string = '/yivi-brp-issue/loadbalancer/header';
+  static readonly ssmProtectionKeyArn: string = '/yivi-brp-issue/kms/protection-key';
 
   static readonly secretDockerhub = '/yivi-brp-issue/pipeline/dockerhub';
   static readonly secretsApiKey = '/yivi-brp-issue/container/api-key';

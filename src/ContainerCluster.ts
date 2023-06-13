@@ -10,6 +10,7 @@ import {
   aws_apigateway as apigateway,
   aws_iam as iam,
   aws_logs as logs,
+  aws_kms as kms,
   aws_ecr as ecr,
   Duration,
 } from 'aws-cdk-lib';
@@ -412,6 +413,25 @@ export class ContainerClusterStack extends Stack {
         IRMA_GW_URL: this.hostedzone.zoneName, // protocol prefix is added in the container
       },
     });
+
+    // Allow role to use the protection key for accessing the secrets on startup
+    const role = service.service.taskDefinition.taskRole;
+    const keyArn = ssm.StringParameter.valueForStringParameter(this, Statics.ssmProtectionKeyArn);
+    const key = kms.Key.fromKeyArn(this, 'protection-key', keyArn);
+    const statement = new iam.PolicyStatement({
+      sid: 'Allow KMS key to be access by ECS and private key admin',
+      effect: iam.Effect.ALLOW,
+      principals: [new iam.ArnPrincipal(role.roleArn)],
+      actions: [
+        'kms:Encrypt',
+        'kms:Decrypt',
+        'kms:ReEncrypt*',
+        'kms:GenerateDataKey*',
+        'kms:DescribeKey',
+      ],
+      resources: ['*'],
+    });
+    key.addToResourcePolicy(statement);
 
     privateKey.grantRead(service.service.taskDefinition.taskRole);
     apiKey.grantRead(service.service.taskDefinition.taskRole);
