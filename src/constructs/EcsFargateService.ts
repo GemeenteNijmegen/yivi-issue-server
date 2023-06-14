@@ -82,6 +82,7 @@ export interface EcsFargateServiceProps {
   /**
    * The ARN of the key used to encrypt the secrets
    * (execution role is given permissions to access the key)
+   * Note: we would expect this to happen automatically as described in https://github.com/aws/aws-cdk/issues/17156
    */
   secretsKmsKeyArn?: string;
 
@@ -174,6 +175,7 @@ export class EcsFargateService extends Construct {
     });
 
     if (props.secretsKmsKeyArn) {
+      // Note solution from: https://github.com/aws/aws-cdk/issues/17156
       taskDef.addToExecutionRolePolicy(new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ['kms:Decrypt'],
