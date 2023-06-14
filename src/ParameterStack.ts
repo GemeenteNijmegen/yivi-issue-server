@@ -35,6 +35,7 @@ export class SecretsStack extends Stack {
       effect: iam.Effect.DENY,
       principals: [new iam.AnyPrincipal()],
       actions: ['kms:*'],
+      resources: ['*'],
       conditions: {
         ArnNotLike: {
           'aws:PrincipalArn': [
