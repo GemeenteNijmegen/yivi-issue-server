@@ -39,7 +39,9 @@ export class SecretsStack extends Stack {
         new iam.PolicyStatement({
           effect: iam.Effect.ALLOW,
           actions: [
-            'secretsmanager:GetSecretValue',
+            'secretsmanager:Describe*',
+            'secretsmanager:Get*',
+            'secretsmanager:List*',
             'secretsmanager:PutSecretValue',
           ],
           resources: secretArns,
