@@ -10,7 +10,6 @@ import {
   aws_apigateway as apigateway,
   aws_iam as iam,
   aws_logs as logs,
-  aws_kms as kms,
   aws_ecr as ecr,
   Duration,
 } from 'aws-cdk-lib';
@@ -419,22 +418,11 @@ export class ContainerClusterStack extends Stack {
     if (!role) {
       throw Error('No task execution role defined!');
     }
-    const keyArn = ssm.StringParameter.valueForStringParameter(this, Statics.ssmProtectionKeyArn);
-    const key = kms.Key.fromKeyArn(this, 'protection-key', keyArn);
-    const statement = new iam.PolicyStatement({
-      sid: 'Allow KMS key to be access by ECS and private key admin',
-      effect: iam.Effect.ALLOW,
-      principals: [new iam.ArnPrincipal(role.roleArn)],
-      actions: [
-        'kms:Encrypt',
-        'kms:Decrypt',
-        'kms:ReEncrypt*',
-        'kms:GenerateDataKey*',
-        'kms:DescribeKey',
-      ],
-      resources: ['*'],
-    });
-    key.addToResourcePolicy(statement);
+    
+    // Allow role to access KMS key
+    const policy = iam.ManagedPolicy.fromAwsManagedPolicyName(Statics.kmsKeyAccessManagedPolicyName);
+    role.addManagedPolicy(policy);
+
     privateKey.grantRead(role);
     apiKey.grantRead(role);
 

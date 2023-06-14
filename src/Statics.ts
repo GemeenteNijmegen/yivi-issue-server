@@ -10,9 +10,10 @@ export class Statics {
   static readonly ssmHostedZoneId = '/yivi-brp-issue/hostedzone/id';
   static readonly ssmHostedZoneName = '/yivi-brp-issue/hostedzone/name';
 
+  static readonly kmsKeyAccessManagedPolicyName = 'yivi-secret-protection-key-access-policy';
+
   // Parameter and secret references
   static readonly ssmProtectionKeyArn: string = '/yivi-brp-issue/kms/protection-key';
-
   static readonly secretDockerhub = '/yivi-brp-issue/pipeline/dockerhub';
   static readonly secretsApiKey = '/yivi-brp-issue/container/api-key';
   static readonly secretsPrivateKey = '/yivi-brp-issue/container/private-key';

@@ -29,9 +29,6 @@ export class SecretsStack extends Stack {
       encryptionKey: key,
     });
 
-    //this.allowSecretManagement(privateKey, adminPolicy);
-    //this.addToKeyPolicy(adminPolicy, key);
-
   }
 
 
@@ -65,22 +62,25 @@ export class SecretsStack extends Stack {
       alias: 'yivi-private-key',
     });
 
-    key.addToResourcePolicy(new iam.PolicyStatement({
-      sid: 'Allow KMS key to be used by secretsmanager',
-      effect: iam.Effect.ALLOW,
-      principals: [new iam.AnyPrincipal()],
-      resources: ['*'],
-      actions: [
-        'kms:CreateGrant',
-        'kms:ListGrants',
-        'kms:RevokeGrant',
-      ],
-      conditions: {
-        Bool: {
-          'kms:GrantIsForAWSResource': 'true',
-        },
-      },
-    }));
+    new iam.ManagedPolicy(this, 'protection-key-access-policy', {
+      managedPolicyName: Statics.kmsKeyAccessManagedPolicyName,
+      description: 'Policy for the protaction key that protects access to secrets for Yivi',
+      statements: [
+        new iam.PolicyStatement({
+          effect: iam.Effect.ALLOW,
+          actions: [
+            'kms:Encrypt',
+            'kms:Decrypt',
+            'kms:ReEncrypt*',
+            'kms:GenerateDataKey*',
+            'kms:DescribeKey',
+          ],
+          resources: [
+            key.keyArn,
+          ],
+        }),
+      ]
+    });
 
     new ssm.StringParameter(this, 'protection-key-arn', {
       parameterName: Statics.ssmProtectionKeyArn,
@@ -91,23 +91,4 @@ export class SecretsStack extends Stack {
 
   }
 
-  // addToKeyPolicy(policy: iam.ManagedPolicy, key: kms.Key) {
-  //   const statement = new iam.PolicyStatement({
-  //     sid: 'Allow KMS key to be access by ECS and private key admin',
-  //     effect: iam.Effect.ALLOW,
-  //     principals: [
-  //       //new iam.ArnPrincipal('irma_ecs_role'), // TODO get role ARN
-  //       new iam.ArnPrincipal(policy.managedPolicyArn),
-  //     ],
-  //     actions: [
-  //       'kms:Encrypt',
-  //       'kms:Decrypt',
-  //       'kms:ReEncrypt*',
-  //       'kms:GenerateDataKey*',
-  //       'kms:DescribeKey',
-  //     ],
-  //     resources: ['*'],
-  //   });
-  //   key.addToResourcePolicy(statement);
-  // }
 }
