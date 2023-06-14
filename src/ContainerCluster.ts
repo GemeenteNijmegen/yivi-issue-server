@@ -419,10 +419,6 @@ export class ContainerClusterStack extends Stack {
       throw Error('No task execution role defined!');
     }
 
-    // Allow role to access KMS key
-    const policy = iam.ManagedPolicy.fromAwsManagedPolicyName(Statics.kmsKeyAccessManagedPolicyName);
-    role.addManagedPolicy(policy);
-
     privateKey.grantRead(role);
     apiKey.grantRead(role);
 
