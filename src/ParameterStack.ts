@@ -28,6 +28,22 @@ export class SecretsStack extends Stack {
       encryptionKey: key,
     });
 
+    // Deny access to secret for all requests except when yivi-adminsitrator
+    const account = Stack.of(this).account;
+    const region = Stack.of(this).region;
+    privateKey.addToResourcePolicy(new iam.PolicyStatement({
+      effect: iam.Effect.DENY,
+      principals: [new iam.AnyPrincipal()],
+      actions: ['kms:*'],
+      conditions: {
+        ArnNotLike: {
+          'aws:PrincipalArn': [
+            `arn:aws:iam::${account}:role/aws-reserved/sso.amazonaws.com/${region}/AWSReservedSSO_yivi-admin*`,
+          ],
+        },
+      },
+    }));
+
     this.createAdminPolicy(key.keyArn, privateKey.secretArn);
   }
 
