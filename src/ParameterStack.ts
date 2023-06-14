@@ -79,7 +79,7 @@ export class SecretsStack extends Stack {
             key.keyArn,
           ],
         }),
-      ]
+      ],
     });
 
     new ssm.StringParameter(this, 'protection-key-arn', {
