@@ -4,6 +4,7 @@ import {
   aws_secretsmanager as secrets,
   aws_cloudwatch as cloudwatch,
   aws_elasticloadbalancingv2 as loadbalancing,
+  aws_iam as iam,
 } from 'aws-cdk-lib';
 import { SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
@@ -77,6 +78,12 @@ export interface EcsFargateServiceProps {
    * Environment variables to pass to the container on startup
    */
   environment?: { [key: string]: string };
+
+  /**
+   * The ARN of the key used to encrypt the secrets
+   * (execution role is given permissions to access the key)
+   */
+  secretsKmsKeyArn?: string;
 
 }
 
@@ -165,6 +172,14 @@ export class EcsFargateService extends Construct {
       secrets: props.secrets,
       environment: props.environment,
     });
+
+    if (props.secretsKmsKeyArn) {
+      taskDef.addToExecutionRolePolicy(new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['kms:Decrypt'],
+        resources: [props.secretsKmsKeyArn],
+      }));
+    }
     return taskDef;
   }
 

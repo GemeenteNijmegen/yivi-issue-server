@@ -38,7 +38,6 @@ export class SecretsStack extends Stack {
   }
 
 
-
   createYiviProtectionKey() {
     const key = new kms.Key(this, 'protection-key', {
       description: 'Key for protecting access to secrets for Yivi',
