@@ -33,7 +33,7 @@ export class SecretsStack extends Stack {
 
   createAdminPolicy(kmsKeyArn: string, ...secretArns: string[]) {
     const policy = new iam.ManagedPolicy(this, 'private-key-admin-policy', {
-      managedPolicyName: 'yivi-private-key-admin-policy',
+      managedPolicyName: Statics.yiviAdministratorPolicy,
       description: 'Policy for YIVI private key admin',
       statements: [
         new iam.PolicyStatement({
