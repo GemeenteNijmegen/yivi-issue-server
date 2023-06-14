@@ -34,7 +34,7 @@ export class SecretsStack extends Stack {
     privateKey.addToResourcePolicy(new iam.PolicyStatement({
       effect: iam.Effect.DENY,
       principals: [new iam.AnyPrincipal()],
-      actions: ['kms:*'],
+      actions: ['secretsmanager:*'],
       resources: ['*'],
       conditions: {
         ArnNotLike: {
