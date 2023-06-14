@@ -53,9 +53,9 @@ export class SecretsStack extends Stack {
             'kms:GenerateDataKey*',
             'kms:DescribeKey',
           ],
-          resources: [ kmsKeyArn ],
+          resources: [kmsKeyArn],
         }),
-      ]
+      ],
     });
     return policy;
   }
