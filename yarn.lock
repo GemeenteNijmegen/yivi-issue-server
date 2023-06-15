@@ -1771,6 +1771,11 @@ cdk-ecr-deployment@^2.5.6:
     got "^11.8.3"
     hpagent "^0.1.2"
 
+cdk-nag@^2.27.37:
+  version "2.27.37"
+  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.27.37.tgz#2c52256e782aff1012c4d99c24c941b6d46a88c8"
+  integrity sha512-l/9gNyV1bA0OqdFatTsWFcccUlEsxYDblGfrqNyUw+nvAH5f4y5l6wxhvmH7jkQ8w6XriXKeBFkuc0Gl1/YAVw==
+
 cdk-remote-stack@^2.0.10:
   version "2.0.10"
   resolved "https://registry.yarnpkg.com/cdk-remote-stack/-/cdk-remote-stack-2.0.10.tgz#ef94664cf8250294214abc2c8e005c18de2ce510"

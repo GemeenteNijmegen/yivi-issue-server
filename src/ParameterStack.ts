@@ -20,6 +20,7 @@ export class SecretsStack extends Stack {
       description: 'API KEY for YIVI issue server',
     });
 
+
     // Secret private key for YIVI issue server
     const key = this.createYiviProtectionKey();
     const privateKey = new secrets.Secret(this, 'private-key', {

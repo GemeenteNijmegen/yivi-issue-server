@@ -54,6 +54,7 @@
     "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.79.1-alpha.0",
     "aws-cdk-lib": "^2.1.0",
     "cdk-ecr-deployment": "^2.5.6",
+    "cdk-nag": "^2.27.37",
     "cdk-remote-stack": "^2.0.10",
     "constructs": "^10.0.5"
   },

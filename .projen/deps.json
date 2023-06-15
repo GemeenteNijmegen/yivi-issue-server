@@ -106,6 +106,10 @@
       "type": "runtime"
     },
     {
+      "name": "cdk-nag",
+      "type": "runtime"
+    },
+    {
       "name": "cdk-remote-stack",
       "type": "runtime"
     },

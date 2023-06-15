@@ -1,4 +1,4 @@
-import { Aspects, Stage, StageProps } from 'aws-cdk-lib';
+import { Aspects, Stack, Stage, StageProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { PermissionsBoundaryAspect } from './Aspect';
 import { Configurable } from './Configuration';
@@ -9,6 +9,11 @@ import { SecretsStack } from './ParameterStack';
 export interface ApiStageProps extends StageProps, Configurable {}
 
 export class ApiStage extends Stage {
+
+  /**
+   * For testing purposes
+   */
+  stacks: Stack[];
 
   constructor(scope: Construct, id: string, props: ApiStageProps) {
     super(scope, id, props);
@@ -32,5 +37,11 @@ export class ApiStage extends Stage {
     });
     cluster.addDependency(secretsStack);
     cluster.addDependency(dnsStack);
+
+    this.stacks = [
+      secretsStack,
+      dnsStack,
+      cluster,
+    ];
   }
 }
