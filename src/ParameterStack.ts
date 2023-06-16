@@ -34,16 +34,20 @@ export class SecretsStack extends Stack {
     const region = Stack.of(this).region;
     privateKey.addToResourcePolicy(new iam.PolicyStatement({
       effect: iam.Effect.DENY,
-      principals: [new iam.AnyPrincipal()],
+      notPrincipals: [
+        new iam.ArnPrincipal(`arn:aws:iam::${account}:role/aws-reserved/sso.amazonaws.com/${region}/AWSReservedSSO_yivi-admin*`),
+        new iam.ArnPrincipal(`arn:aws:iam::${account}:role/cdk-hnb659fds-deploy-role-${account}-${region}`),
+      ],
       actions: ['secretsmanager:*'],
       resources: ['*'],
-      conditions: {
-        ArnNotLike: {
-          'aws:PrincipalArn': [
-            `arn:aws:iam::${account}:role/aws-reserved/sso.amazonaws.com/${region}/AWSReservedSSO_yivi-admin*`,
-          ],
-        },
-      },
+      // conditions: {
+      //   'ForAnyValue:ArnNotLike': {
+      //     'aws:PrincipalArn': [
+      //       ``,
+      //       ,
+      //     ],
+      //   },
+      // },
     }));
 
     this.createAdminPolicy(key.keyArn, privateKey.secretArn);
