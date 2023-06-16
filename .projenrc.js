@@ -5,6 +5,7 @@ const project = new GemeenteNijmegenCdkApp({
   devDeps: ['@gemeentenijmegen/projen-project-type'],
   name: 'yivi-issue-server',
   deps: [
+    '@gemeentenijmegen/aws-constructs',
     'cdk-nag',
     'cdk-remote-stack',
     'cdk-ecr-deployment',

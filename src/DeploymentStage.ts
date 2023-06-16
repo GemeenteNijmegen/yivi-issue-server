@@ -1,3 +1,4 @@
+import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
 import {
   Aspects,
   Stack,
@@ -13,7 +14,6 @@ import {
 import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
 import * as ecrdeploy from 'cdk-ecr-deployment';
 import { Construct } from 'constructs';
-import { PermissionsBoundaryAspect } from './Aspect';
 import { Configurable, Configuration } from './Configuration';
 import { Statics } from './Statics';
 

@@ -1,3 +1,4 @@
+import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
 import * as core from 'aws-cdk-lib';
 import {
   Aspects,
@@ -6,7 +7,6 @@ import {
 import * as cdkpipelines from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
 import { ApiStage } from './ApiStage';
-import { PermissionsBoundaryAspect } from './Aspect';
 import { Configurable } from './Configuration';
 import { DeploymentStage } from './DeploymentStage';
 import { Statics } from './Statics';
