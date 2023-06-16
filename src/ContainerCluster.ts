@@ -91,7 +91,7 @@ export class ContainerClusterStack extends Stack {
       },
     });
     session.addMethod('POST', sessionIntegration, {
-      //authorizationType: apigateway.AuthorizationType.IAM,
+      authorizationType: apigateway.AuthorizationType.IAM,
       requestParameters: {
         'method.request.header.irma-authorization': true,
       },
