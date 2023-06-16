@@ -34,7 +34,7 @@ export class SecretsStack extends Stack {
     const region = Stack.of(this).region;
     privateKey.addToResourcePolicy(new iam.PolicyStatement({
       effect: iam.Effect.DENY,
-      principals: [ new iam.AnyPrincipal() ],
+      principals: [new iam.AnyPrincipal()],
       actions: ['secretsmanager:*'],
       resources: ['*'],
       conditions: {
@@ -94,12 +94,10 @@ export class SecretsStack extends Stack {
       description: 'Key for protecting access to secrets for Yivi',
       alias: 'yivi-private-key',
     });
-
     new ssm.StringParameter(this, 'protection-key-arn', {
       parameterName: Statics.ssmProtectionKeyArn,
       stringValue: key.keyArn,
     });
-
     return key;
 
   }

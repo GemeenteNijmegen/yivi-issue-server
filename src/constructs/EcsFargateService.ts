@@ -174,15 +174,18 @@ export class EcsFargateService extends Construct {
       environment: props.environment,
     });
 
-    if (props.secretsKmsKeyArn) {
-      // Note solution from: https://github.com/aws/aws-cdk/issues/17156
-      taskDef.addToExecutionRolePolicy(new iam.PolicyStatement({
+    return taskDef;
+  }
+
+  public allowToDecryptUsingKey(keyArn: string) {
+    // Note solution from: https://github.com/aws/aws-cdk/issues/17156
+    this.service.taskDefinition.addToExecutionRolePolicy(
+      new iam.PolicyStatement({
         effect: iam.Effect.ALLOW,
         actions: ['kms:Decrypt'],
-        resources: [props.secretsKmsKeyArn],
-      }));
-    }
-    return taskDef;
+        resources: [keyArn],
+      }),
+    );
   }
 
   /**
@@ -214,7 +217,11 @@ export class EcsFargateService extends Construct {
     return service;
   }
 
-  setupContainerMonitoring(props: EcsFargateServiceProps) {
+  /**
+   * Add alarms for CPU and Memory
+   * @param props
+   */
+  private setupContainerMonitoring(props: EcsFargateServiceProps) {
     new cloudwatch.Alarm(this, `${props.serviceName}-cpu-util-alarm`, {
       metric: this.service.metricCpuUtilization(),
       alarmDescription: `Alarm on CPU utilization for ${props.serviceName}`,

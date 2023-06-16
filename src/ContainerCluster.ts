@@ -369,19 +369,14 @@ export class ContainerClusterStack extends Stack {
     const branch = props.configuration.branchName;
     const ecrRepositoryArn = `arn:aws:ecr:${region}:${account}:repository/yivi-issue-server-${branch}`;
     const ecrRepository = ecr.Repository.fromRepositoryArn(this, 'repository', ecrRepositoryArn);
-    //const image = ecs.ContainerImage.fromRegistry('nginxdemos/hello');
     const image = ecs.ContainerImage.fromEcrRepository(ecrRepository);
-
-    const containerPort = 8080;
-
-    // Allow traffic to the container
-    // const sg = new SecurityGroup(this, 'issue-service-sg', { vpc: this.vpc });
-    // sg.addIngressRule(ec2.Peer.securityGroupId(vpcLinkSecurityGroup.securityGroupId), ec2.Port.tcp(containerPort));
 
     // Get secrets
     const apiKey = Secret.fromSecretNameV2(this, 'api-key', Statics.secretsApiKey);
     const privateKey = Secret.fromSecretNameV2(this, 'private-key', Statics.secretsPrivateKey);
 
+    // Define a security group to allow ingress on the container port
+    const containerPort = 8080;
     const serviceSecurityGroup = new ec2.SecurityGroup(this, 'issue-service-sg', {
       vpc: this.vpc,
       description: 'Security group for the yivi-issue-server',
@@ -411,7 +406,6 @@ export class ContainerClusterStack extends Stack {
       environment: {
         IRMA_GW_URL: this.hostedzone.zoneName, // protocol prefix is added in the container
       },
-      secretsKmsKeyArn: ssm.StringParameter.valueForStringParameter(this, Statics.ssmProtectionKeyArn),
     });
 
     // Allow role to use the protection key for accessing the secrets on startup
@@ -419,7 +413,8 @@ export class ContainerClusterStack extends Stack {
     if (!role) {
       throw Error('No task execution role defined!');
     }
-
+    const protectionKeyArn = ssm.StringParameter.valueForStringParameter(this, Statics.ssmProtectionKeyArn);
+    service.allowToDecryptUsingKey(protectionKeyArn);
     privateKey.grantRead(role);
     apiKey.grantRead(role);
 
