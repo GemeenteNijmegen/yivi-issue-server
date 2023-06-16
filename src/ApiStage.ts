@@ -4,7 +4,7 @@ import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
 import { ContainerClusterStack } from './ContainerCluster';
 import { DnsStack } from './DnsStack';
-import { SecretsStack } from './ParameterStack';
+import { SecretsStack } from './SecretsStack';
 
 export interface ApiStageProps extends StageProps, Configurable {}
 
