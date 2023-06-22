@@ -74,6 +74,8 @@ describe('Private key protection', () => {
                 'arn:aws:iam::123456789012:role/aws-reserved/sso.amazonaws.com/eu-west-1/AWSReservedSSO_yivi-admin*',
                 // CDK role must be allowed to managed otherwise cloudformation will fail deployment.
                 'arn:aws:iam::123456789012:role/cdk-hnb659fds-cfn-exec-role-123456789012-eu-west-1',
+                // The ECS task execution role must be allowed to get the secret
+                `arn:aws:iam::123456789012:role/${Statics.yiviContainerTaskExecutionRoleName}`,
               ],
             },
           },

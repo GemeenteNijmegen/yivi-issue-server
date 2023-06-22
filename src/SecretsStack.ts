@@ -20,7 +20,6 @@ export class SecretsStack extends Stack {
       description: 'API KEY for YIVI issue server',
     });
 
-
     // Secret private key for YIVI issue server
     const key = this.createYiviProtectionKey();
     const privateKey = new secrets.Secret(this, 'private-key', {
@@ -42,6 +41,7 @@ export class SecretsStack extends Stack {
           'aws:PrincipalArn': [
             `arn:aws:iam::${account}:role/aws-reserved/sso.amazonaws.com/${region}/AWSReservedSSO_yivi-admin*`,
             `arn:aws:iam::${account}:role/cdk-hnb659fds-cfn-exec-role-${account}-${region}`,
+            `arn:aws:iam::${account}:role/${Statics.yiviContainerTaskExecutionRoleName}`, // Allow the ECS task to access this secret aswell
           ],
         },
       },

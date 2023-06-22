@@ -45,6 +45,8 @@ export class DnsStack extends Stack {
       stringValue: hostedzone.zoneName,
     });
 
+    // TODO add DNSEC (us-east-1)
+
 
   }
 

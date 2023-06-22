@@ -8,6 +8,7 @@ import {
 } from 'aws-cdk-lib';
 import { SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
+import { Statics } from '../Statics';
 
 const ALARM_THRESHOLD = 70;
 const ALARM_DATA_POINTS = 3;
@@ -155,6 +156,7 @@ export class EcsFargateService extends Construct {
       compatibility: ecs.Compatibility.FARGATE,
       cpu: '256', // TODO Uses minimal cpu and memory
       memoryMiB: '512',
+      executionRole: this.setupTaskExecutionRole(),
     });
 
     taskDef.addContainer(`${props.serviceName}-container`, {
@@ -176,6 +178,16 @@ export class EcsFargateService extends Construct {
 
     return taskDef;
   }
+
+  private setupTaskExecutionRole() {
+    const role = new iam.Role(this, 'task-execution-role', {
+      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
+      roleName: Statics.yiviContainerTaskExecutionRoleName,
+    });
+
+    return role;
+  }
+
 
   public allowToDecryptUsingKey(keyArn: string) {
     // Note solution from: https://github.com/aws/aws-cdk/issues/17156
