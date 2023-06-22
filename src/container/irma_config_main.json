@@ -1,0 +1,32 @@
+{
+  "schemes_path": "/usr/local/share/irma/irma_configuration",
+  "disable_schemes_update": false,
+  "privkeys": "/usr/local/share/irma/privatekeys",
+  "schemes_update": 60,
+  "url": "IRMA_GW_URL",
+  "DisableTLS": true,
+  "EnableSSE": false,
+  "quiet": false,
+  "log_json": true,
+  "production": true,
+  "email": "b.withaar@nijmegen.nl",
+  "no_email": "false",
+  "disclose_perms": [
+    "pbdf.gemeente.*"
+  ],
+  "sign_perms": [
+    "pbdf.gemeente.*"
+  ],
+  "issue_perms": [
+    "pbdf.gemeente.*"
+  ],
+  "no_auth": false,
+  "port": 8080,
+  "requestors": {
+    "irmaapp": {
+      "auth_method": "token",
+      "key": "IRMA_TOKEN"
+    }
+  },
+  "max_request_age": 300
+}

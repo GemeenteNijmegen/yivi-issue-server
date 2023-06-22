@@ -1,20 +1,29 @@
+import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
 import * as core from 'aws-cdk-lib';
+import {
+  Aspects,
+  aws_secretsmanager as secretsmanager,
+} from 'aws-cdk-lib';
 import * as cdkpipelines from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
 import { ApiStage } from './ApiStage';
-import { Configuration } from './Configuration';
+import { Configurable } from './Configuration';
+import { DeploymentStage } from './DeploymentStage';
 import { Statics } from './Statics';
 
-export interface PipelineStackProps extends core.StackProps {
-  configuration: Configuration;
-}
+export interface PipelineStackProps extends core.StackProps, Configurable {}
 
 export class PipelineStack extends core.Stack {
 
+
   constructor(scope: Construct, id: string, props: PipelineStackProps) {
+
     super(scope, id, props);
+
+    Aspects.of(this).add(new PermissionsBoundaryAspect('/', 'landingzone-workload-permissions-boundary'));
+
     core.Tags.of(this).add('cdkManaged', 'yes');
-    core.Tags.of(this).add('project', 'auth');
+    core.Tags.of(this).add('project', Statics.projectName);
 
     //Repo for the main cdk project
     const repository = cdkpipelines.CodePipelineSource.connection(Statics.gitRepository, props.configuration.branchName, {
@@ -22,6 +31,7 @@ export class PipelineStack extends core.Stack {
     });
 
     // Construct the pipeline
+    const dockerHubSecret = this.setupDockerhubSecret();
     const pipeline = new cdkpipelines.CodePipeline(this, 'pipeline', {
       pipelineName: `yivi-issue-server-${props.configuration.branchName}`,
       crossAccountKeys: true,
@@ -35,10 +45,18 @@ export class PipelineStack extends core.Stack {
           'yarn build',
         ],
       }),
+      dockerCredentials: [
+        cdkpipelines.DockerCredential.dockerHub(dockerHubSecret),
+      ],
     });
 
+    // This stage must have a branch dependent name as it lives in the gn-build account!
+    pipeline.addStage(new DeploymentStage(this, `yivi-issue-server-${props.configuration.branchName}-deployment`, {
+      configuration: props.configuration,
+    }));
+
     pipeline.addStage(new ApiStage(this, 'yivi-issue-server', {
-      ...props.configuration,
+      configuration: props.configuration,
     }));
 
     // TODO figure out an request to check if the container is actually live and reachable
@@ -50,4 +68,12 @@ export class PipelineStack extends core.Stack {
     // }
 
   }
+
+  setupDockerhubSecret() {
+    return new secretsmanager.Secret(this, 'dockerhub-secret', {
+      description: 'Dockerhub secret for yivi-brp-issue server',
+      secretName: Statics.secretDockerhub,
+    });
+  }
+
 }

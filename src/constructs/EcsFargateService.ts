@@ -1,11 +1,18 @@
-import { randomUUID } from 'crypto';
 import {
   aws_logs as logs,
   aws_ecs as ecs,
   aws_secretsmanager as secrets,
+  aws_cloudwatch as cloudwatch,
   aws_elasticloadbalancingv2 as loadbalancing,
+  aws_iam as iam,
 } from 'aws-cdk-lib';
+import { SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
+import { Statics } from '../Statics';
+
+const ALARM_THRESHOLD = 70;
+const ALARM_DATA_POINTS = 3;
+const ALARM_EVAL_PERIODS = 5;
 
 export interface EcsFargateServiceProps {
   /**
@@ -28,7 +35,7 @@ export interface EcsFargateServiceProps {
   /**
    * The loadbalancer listner to which to connect this service
    */
-  listner: loadbalancing.IApplicationListener;
+  listner: loadbalancing.NetworkListener;
 
   /**
    * Desired numer of tasks that should run in this service.
@@ -38,19 +45,12 @@ export interface EcsFargateServiceProps {
   /**
    * The container image to use (e.g. on dockerhub)
    */
-  containerImage: string;
+  containerImage: ecs.ContainerImage;
 
   /**
-   * Container listing port
+   * Container port to open
    */
   containerPort: number;
-
-  /**
-   * Service listner path
-   * (i.e. the path that the loadbalancer will use for this service)
-   * Example: '/api/*'
-   */
-  serviceListnerPath: string;
 
   /**
    * Indicator if sport instances should be used for
@@ -59,14 +59,35 @@ export interface EcsFargateServiceProps {
   useSpotInstances?: boolean;
 
   /**
-   * Set a token that must be send using the
-   * X-Cloudfront-Access-Token header from cloudfront to allow the
-   * request to pass trough the loadbalancer.
+   * The command that is executed using the default shell in the container
+   * exit code 0 is considered healthy.
+   * Example 'wget localhost:80/irma -O /dev/null -q || exit 1'
    */
-  cloudfrontOnlyAccessToken?: string;
+  healthCheckCommand: string;
+
+  /**
+   * Provide security groups for this service
+   */
+  securityGroups?: SecurityGroup[];
+
+  /**
+   * Secrets to pass to the container on startup
+   */
+  secrets?: { [key: string]: ecs.Secret };
+
+  /**
+   * Environment variables to pass to the container on startup
+   */
+  environment?: { [key: string]: string };
+
+  /**
+   * The ARN of the key used to encrypt the secrets
+   * (execution role is given permissions to access the key)
+   * Note: we would expect this to happen automatically as described in https://github.com/aws/aws-cdk/issues/17156
+   */
+  secretsKmsKeyArn?: string;
 
 }
-
 
 /**
  * The ecs fargate service construct:
@@ -78,6 +99,7 @@ export interface EcsFargateServiceProps {
 export class EcsFargateService extends Construct {
 
   readonly logGroupArn: string;
+  readonly service: ecs.FargateService;
 
   constructor(scope: Construct, id: string, props: EcsFargateServiceProps) {
     super(scope, id);
@@ -88,47 +110,29 @@ export class EcsFargateService extends Construct {
 
     // Task, service and expose to loadbalancer
     const task = this.setupTaskDefinition(logGroup, props);
-    const service = this.setupFargateService(task, props);
-    this.setupLoadbalancerTarget(service, props);
+    this.service = this.setupFargateService(task, props);
+    this.setupLoadbalancingTarget(props);
+    this.setupContainerMonitoring(props);
 
   }
-
 
   /**
-   * Exposes the service to the loadbalancer listner on a given path and port
-   * @param service
+   * Take the ECS service and add is to the loadbalancer target group
    * @param props
    */
-  private setupLoadbalancerTarget(service: ecs.FargateService, props: EcsFargateServiceProps) {
-
-    const conditions = [
-      loadbalancing.ListenerCondition.pathPatterns([props.serviceListnerPath]),
-    ];
-    if (props.cloudfrontOnlyAccessToken) {
-      conditions.push(loadbalancing.ListenerCondition.httpHeader('X-Cloudfront-Access-Token', [randomUUID()]));
-    }
-
-    props.listner.addTargets(`${props.serviceName}-target`, {
-      port: props.containerPort,
-      protocol: loadbalancing.ApplicationProtocol.HTTP,
-      targets: [service],
-      conditions,
-      priority: 10,
-      // TODO healthcheck for all containers
-      // healthCheck: {
-      //   enabled: true,
-      //   path: props.healthCheckSettings.path,
-      //   healthyHttpCodes: '200',
-      //   healthyThresholdCount: 2,
-      //   unhealthyThresholdCount: 6,
-      //   timeout: Duration.seconds(10),
-      //   interval: Duration.seconds(15),
-      //   protocol: elasticloadbalancingv2.Protocol.HTTP,
-      // },
-      //deregistrationDelay: Duration.minutes(1),
+  setupLoadbalancingTarget(props: EcsFargateServiceProps) {
+    const targetGroup = new loadbalancing.NetworkTargetGroup(this, 'targets', {
+      vpc: props.ecsCluster.vpc,
+      port: 8080,
+      healthCheck: {
+        enabled: true,
+        port: '8080',
+        protocol: loadbalancing.Protocol.TCP,
+      },
     });
+    props.listner.addTargetGroups(props.serviceName, targetGroup);
+    targetGroup.addTarget(this.service);
   }
-
 
   /**
    * Setup a basic log group for this service's logs
@@ -136,7 +140,7 @@ export class EcsFargateService extends Construct {
    */
   private logGroup(props: EcsFargateServiceProps) {
     const logGroup = new logs.LogGroup(this, `${props.serviceName}-logs`, {
-      retention: logs.RetentionDays.ONE_DAY, // TODO Very short lived (no need to keep demo stuff)
+      retention: logs.RetentionDays.ONE_MONTH,
     });
     return logGroup;
   }
@@ -152,12 +156,11 @@ export class EcsFargateService extends Construct {
       compatibility: ecs.Compatibility.FARGATE,
       cpu: '256', // TODO Uses minimal cpu and memory
       memoryMiB: '512',
+      executionRole: this.setupTaskExecutionRole(),
     });
 
     taskDef.addContainer(`${props.serviceName}-container`, {
-      image: ecs.ContainerImage.fromRegistry(props.containerImage, {
-        credentials: props.dockerhubSecret,
-      }),
+      image: props.containerImage,
       logging: new ecs.AwsLogDriver({
         streamPrefix: 'logs',
         logGroup: logGroup,
@@ -165,8 +168,36 @@ export class EcsFargateService extends Construct {
       portMappings: [{
         containerPort: props.containerPort,
       }],
+      readonlyRootFilesystem: false,
+      // healthCheck: { // Ignored when using a networkloadbalancer
+      //   command: ['CMD-SHELL', props.healthCheckCommand],
+      // },
+      secrets: props.secrets,
+      environment: props.environment,
     });
+
     return taskDef;
+  }
+
+  private setupTaskExecutionRole() {
+    const role = new iam.Role(this, 'task-execution-role', {
+      assumedBy: new iam.ServicePrincipal('ecs-tasks.amazonaws.com'),
+      roleName: Statics.yiviContainerTaskExecutionRoleName,
+    });
+
+    return role;
+  }
+
+
+  public allowToDecryptUsingKey(keyArn: string) {
+    // Note solution from: https://github.com/aws/aws-cdk/issues/17156
+    this.service.taskDefinition.addToExecutionRolePolicy(
+      new iam.PolicyStatement({
+        effect: iam.Effect.ALLOW,
+        actions: ['kms:Decrypt'],
+        resources: [keyArn],
+      }),
+    );
   }
 
   /**
@@ -175,6 +206,7 @@ export class EcsFargateService extends Construct {
    * @param props
    */
   private setupFargateService(task: ecs.TaskDefinition, props: EcsFargateServiceProps) {
+
     const service = new ecs.FargateService(this, `${props.serviceName}-service`, {
       cluster: props.ecsCluster,
       serviceName: `${props.serviceName}-service`,
@@ -186,9 +218,39 @@ export class EcsFargateService extends Construct {
           weight: 1,
         },
       ],
+      vpcSubnets: {
+        subnetType: SubnetType.PRIVATE_WITH_EGRESS,
+      },
+      securityGroups: props.securityGroups,
     });
+
+
     service.node.addDependency(props.ecsCluster);
     return service;
+  }
+
+  /**
+   * Add alarms for CPU and Memory
+   * @param props
+   */
+  private setupContainerMonitoring(props: EcsFargateServiceProps) {
+    new cloudwatch.Alarm(this, `${props.serviceName}-cpu-util-alarm`, {
+      metric: this.service.metricCpuUtilization(),
+      alarmDescription: `Alarm on CPU utilization for ${props.serviceName}`,
+      threshold: ALARM_THRESHOLD,
+      evaluationPeriods: ALARM_EVAL_PERIODS,
+      datapointsToAlarm: ALARM_DATA_POINTS,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+    });
+
+    new cloudwatch.Alarm(this, `${props.serviceName}-memory-util-alarm`, {
+      metric: this.service.metricMemoryUtilization(),
+      alarmDescription: `Alarm on memory utilization for ${props.serviceName}`,
+      threshold: ALARM_THRESHOLD,
+      evaluationPeriods: ALARM_EVAL_PERIODS,
+      datapointsToAlarm: ALARM_DATA_POINTS,
+      comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_OR_EQUAL_TO_THRESHOLD,
+    });
   }
 
 }

@@ -5,9 +5,13 @@ const project = new GemeenteNijmegenCdkApp({
   devDeps: ['@gemeentenijmegen/projen-project-type'],
   name: 'yivi-issue-server',
   deps: [
+    '@gemeentenijmegen/aws-constructs',
+    'cdk-nag',
     'cdk-remote-stack',
+    'cdk-ecr-deployment',
     '@aws-cdk/aws-apigatewayv2-alpha',
     '@aws-cdk/aws-apigatewayv2-integrations-alpha',
+    '@aws-cdk/aws-apigatewayv2-authorizers-alpha',
   ],
   // deps: [],                /* Runtime dependencies of this module. */
   // description: undefined,  /* The description is just a string that helps people understand the purpose of the package. */

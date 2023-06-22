@@ -1,6 +1,7 @@
 #!/bin/sh
 
 echo "Updating irma_config.json file"
+echo $IRMA_GW_URL
 sed -i -e "s/IRMA_TOKEN/$IRMA_TOKEN/g" /usr/local/share/irma/irma_config.json
 sed -i -e "s/IRMA_GW_URL/https:\/\/$IRMA_GW_URL/g" /usr/local/share/irma/irma_config.json
 
