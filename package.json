@@ -49,9 +49,6 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
-    "@aws-cdk/aws-apigatewayv2-alpha": "^2.79.1-alpha.0",
-    "@aws-cdk/aws-apigatewayv2-authorizers-alpha": "^2.82.0-alpha.0",
-    "@aws-cdk/aws-apigatewayv2-integrations-alpha": "^2.79.1-alpha.0",
     "@gemeentenijmegen/aws-constructs": "^0.0.4",
     "aws-cdk-lib": "^2.1.0",
     "cdk-ecr-deployment": "^2.5.6",
