@@ -6,11 +6,36 @@ export interface Configurable {
 }
 
 export interface Configuration {
+
+  /**
+   * Git branch name associated with this configuration
+   */
   branchName: string;
+
+  /**
+   * Which version of IRMA GO to download and
+   * pack in the image
+   */
   yiviVersionNumber: string;
+
+  /**
+   * Checksum of the IRMA GO executable
+   */
   yiviVersionChecksum: string;
+
+  /**
+   * Codestar connection to use
+   */
   codeStarConnectionArn: string;
+
+  /**
+   * Deployment account (usually gn-build)
+   */
   deployFromEnvironment: Environment;
+
+  /**
+   * The environment to deploy the project to
+   */
   deployToEnvironment: Environment;
 
   /**
@@ -25,10 +50,6 @@ export interface Configuration {
    */
   sessionEndpointIamUser: boolean;
 
-  /**
-   * Incidator for which configuration file to use
-   */
-  buildTargetEnvironment: 'accp' | 'prod';
 }
 
 export const configurations: { [key: string]: Configuration } = {
@@ -44,7 +65,18 @@ export const configurations: { [key: string]: Configuration } = {
       'arn:aws:iam::315037222840:role/yivi-issue-api-api-stack-yiviissueissuefunctionlam-13P8QZIPPJXI1', // webapp old lz
     ],
     sessionEndpointIamUser: true,
-    buildTargetEnvironment: 'accp',
+  },
+  main: {
+    branchName: 'main',
+    yiviVersionNumber: 'v0.12.1',
+    yiviVersionChecksum: 'd772b84c42379fed2a50ce3375ff14522e32dce38298a6797f496db0f5e1d373',
+    codeStarConnectionArn: Statics.codeStarConnectionArn,
+    deployFromEnvironment: Statics.deploymentEnvironment,
+    deployToEnvironment: Statics.productionEnvironment,
+    sessionEndpointAllowList: [
+      // This cannot be used currently (webapp does not offer support yet)
+    ],
+    sessionEndpointIamUser: true,
   },
 };
 

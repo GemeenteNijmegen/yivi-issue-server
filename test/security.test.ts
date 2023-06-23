@@ -12,7 +12,6 @@ const dummyEnv = {
 
 const testConfiguration: Configuration = {
   branchName: 'test',
-  buildTargetEnvironment: 'accp',
   codeStarConnectionArn: '',
   deployFromEnvironment: dummyEnv,
   deployToEnvironment: dummyEnv,

@@ -20,7 +20,6 @@ test('ApiStage cdk-nag', () => {
       branchName: 'test',
       deployToEnvironment: dummyEnv,
       deployFromEnvironment: dummyEnv,
-      buildTargetEnvironment: 'accp',
       codeStarConnectionArn: Statics.codeStarConnectionArn,
       sessionEndpointAllowList: [],
       sessionEndpointIamUser: true,
