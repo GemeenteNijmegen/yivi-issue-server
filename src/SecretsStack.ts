@@ -15,23 +15,32 @@ export class SecretsStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    new secrets.Secret(this, 'api-key', {
-      secretName: Statics.secretsApiKey,
-      description: 'API KEY for YIVI issue server',
-    });
-
     // Secret private key for YIVI issue server
     const key = this.createYiviProtectionKey();
+
+    const apiKey = new secrets.Secret(this, 'api-key', {
+      secretName: Statics.secretsApiKey,
+      description: 'API KEY for YIVI issue server',
+      encryptionKey: key,
+    });
+
     const privateKey = new secrets.Secret(this, 'private-key', {
       secretName: Statics.secretsPrivateKey,
       description: 'Private key for YIVI issue server',
       encryptionKey: key,
     });
 
-    // Deny access to secret for all requests except when yivi-adminsitrator
+    // Deny access to secret for all requests except yivi-adminsitrator
+    this.allowManagementOfSecret(apiKey);
+    this.allowManagementOfSecret(privateKey);
+
+    this.createAdminPolicy(key.keyArn, privateKey.secretArn);
+  }
+
+  allowManagementOfSecret(secret: secrets.Secret) {
     const account = Stack.of(this).account;
     const region = Stack.of(this).region;
-    privateKey.addToResourcePolicy(new iam.PolicyStatement({
+    secret.addToResourcePolicy(new iam.PolicyStatement({
       effect: iam.Effect.DENY,
       principals: [new iam.AnyPrincipal()],
       actions: ['secretsmanager:*'],
@@ -46,8 +55,6 @@ export class SecretsStack extends Stack {
         },
       },
     }));
-
-    this.createAdminPolicy(key.keyArn, privateKey.secretArn);
   }
 
   createAdminPolicy(kmsKeyArn: string, ...secretArns: string[]) {
