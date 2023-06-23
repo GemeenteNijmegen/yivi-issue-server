@@ -50,6 +50,12 @@ export interface Configuration {
    */
   sessionEndpointIamUser: boolean;
 
+  /**
+   * Use FARGATE_SPOT instances
+   * @default false
+   */
+  useSpotInstances?: boolean;
+
 }
 
 export const configurations: { [key: string]: Configuration } = {
@@ -65,6 +71,7 @@ export const configurations: { [key: string]: Configuration } = {
       'arn:aws:iam::315037222840:role/yivi-issue-api-api-stack-yiviissueissuefunctionlam-13P8QZIPPJXI1', // webapp old lz
     ],
     sessionEndpointIamUser: true,
+    useSpotInstances: true,
   },
   main: {
     branchName: 'main',

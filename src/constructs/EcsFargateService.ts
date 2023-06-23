@@ -1,7 +1,6 @@
 import {
   aws_logs as logs,
   aws_ecs as ecs,
-  aws_secretsmanager as secrets,
   aws_cloudwatch as cloudwatch,
   aws_elasticloadbalancingv2 as loadbalancing,
   aws_iam as iam,
@@ -20,12 +19,6 @@ export interface EcsFargateServiceProps {
    * A service suffix is automatically added.
    */
   serviceName: string;
-
-  /**
-   * Provide a servet that contains the credentials
-   * key value pairs with username and password to a dockerhub account.
-   */
-  dockerhubSecret?: secrets.ISecret;
 
   /**
    * The ECS cluster to which to add this fargate service
@@ -59,13 +52,6 @@ export interface EcsFargateServiceProps {
   useSpotInstances?: boolean;
 
   /**
-   * The command that is executed using the default shell in the container
-   * exit code 0 is considered healthy.
-   * Example 'wget localhost:80/irma -O /dev/null -q || exit 1'
-   */
-  healthCheckCommand: string;
-
-  /**
    * Provide security groups for this service
    */
   securityGroups?: SecurityGroup[];
@@ -81,11 +67,12 @@ export interface EcsFargateServiceProps {
   environment?: { [key: string]: string };
 
   /**
-   * The ARN of the key used to encrypt the secrets
-   * (execution role is given permissions to access the key)
-   * Note: we would expect this to happen automatically as described in https://github.com/aws/aws-cdk/issues/17156
+   * The size the container may be
    */
-  secretsKmsKeyArn?: string;
+  containerSize?: {
+    cpu: '256' | '512' | '1024'| '2048';
+    mem: '512' | '1024'| '2048' | '4096';
+  };
 
 }
 
@@ -154,8 +141,8 @@ export class EcsFargateService extends Construct {
 
     const taskDef = new ecs.TaskDefinition(this, `${props.serviceName}-task`, {
       compatibility: ecs.Compatibility.FARGATE,
-      cpu: '256', // TODO Uses minimal cpu and memory
-      memoryMiB: '512',
+      cpu: props.containerSize?.cpu ?? '512',
+      memoryMiB: props.containerSize?.mem ?? '1024',
       executionRole: this.setupTaskExecutionRole(),
     });
 
@@ -169,9 +156,6 @@ export class EcsFargateService extends Construct {
         containerPort: props.containerPort,
       }],
       readonlyRootFilesystem: false,
-      // healthCheck: { // Ignored when using a networkloadbalancer
-      //   command: ['CMD-SHELL', props.healthCheckCommand],
-      // },
       secrets: props.secrets,
       environment: props.environment,
     });
