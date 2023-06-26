@@ -42,7 +42,7 @@ class ContainerStack extends Stack {
     const repositoryName = `yivi-issue-server-${props.configuration.branchName}`;
     this.createRepository(repositoryName, props);
     const img = this.buildContainer(props);
-    this.moveImageToRepository(repositoryName, img);
+    this.moveImageToRepository(repositoryName, img, props);
 
   }
 
@@ -89,11 +89,11 @@ class ContainerStack extends Stack {
     return img;
   }
 
-  moveImageToRepository(repositoryName: string, image: DockerImageAsset) {
+  moveImageToRepository(repositoryName: string, image: DockerImageAsset, props: DeploymentStackProps) {
     // Construct the target ecr url
     const account = Stack.of(this).account;
     const region = Stack.of(this).region;
-    const ecrTarget = `${account}.dkr.ecr.${region}.amazonaws.com/${repositoryName}:latest`;
+    const ecrTarget = `${account}.dkr.ecr.${region}.amazonaws.com/${repositoryName}:${props.configuration.yiviVersionNumber}`;
 
     // Publish by deploying the image to ECR in this account
     new ecrdeploy.ECRDeployment(this, 'deploy-image', {

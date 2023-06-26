@@ -20,7 +20,7 @@ export class ApiStage extends Stage {
 
     Aspects.of(this).add(new PermissionsBoundaryAspect('/', 'landingzone-workload-permissions-boundary'));
 
-    const secretsStack = new SecretsStack(this, 'parameter-stack', {
+    const secretsStack = new SecretsStack(this, 'secrets-stack', {
       env: props.configuration.deployToEnvironment,
       description: 'Secret for yivi-issue-server (including private key alarms)',
     });

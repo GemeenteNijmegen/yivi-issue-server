@@ -12,7 +12,6 @@ const dummyEnv = {
 
 const testConfiguration: Configuration = {
   branchName: 'test',
-  buildTargetEnvironment: 'accp',
   codeStarConnectionArn: '',
   deployFromEnvironment: dummyEnv,
   deployToEnvironment: dummyEnv,
@@ -32,7 +31,7 @@ describe('Private key protection', () => {
 
   test('Private key access is not used by other stacks', () => {
 
-    const parameterStack = stage.stacks.find(stack => stack.node.id === 'parameter-stack');
+    const parameterStack = stage.stacks.find(stack => stack.node.id === 'secrets-stack');
     const clusterStack = stage.stacks.find(stack => stack.node.id === 'cluster-stack');
     if (!parameterStack || !clusterStack) {
       throw new Error('Parameter or cluster stack not found');
@@ -53,7 +52,7 @@ describe('Private key protection', () => {
     stage.stacks.forEach(stack => {
       const template = Template.fromStack(stack);
       const templateStr = JSON.stringify(template.toJSON());
-      if (stack.node.id !== 'cluster-stack' && stack.node.id !== 'parameter-stack') {
+      if (stack.node.id !== 'cluster-stack' && stack.node.id !== 'secrets-stack') {
         expect(templateStr).not.toContain(Statics.secretsPrivateKey);
       }
     });
@@ -89,7 +88,7 @@ describe('Private key protection', () => {
       Version: '2012-10-17',
     };
 
-    const parameterStack = stage.stacks.find(stack => stack.node.id === 'parameter-stack');
+    const parameterStack = stage.stacks.find(stack => stack.node.id === 'secrets-stack');
     if (!parameterStack) {
       throw new Error('Parametes stack not found');
     }

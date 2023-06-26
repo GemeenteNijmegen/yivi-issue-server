@@ -395,8 +395,7 @@ export class ContainerClusterStack extends Stack {
       containerPort: containerPort,
       ecsCluster: cluster,
       desiredtaskcount: 1,
-      useSpotInstances: true,
-      healthCheckCommand: '/tmp/health_check.sh',
+      useSpotInstances: props.configuration.useSpotInstances ?? false,
       listner: listner,
       securityGroups: [serviceSecurityGroup],
       secrets: {
