@@ -31,24 +31,7 @@ export class PipelineStack extends core.Stack {
     });
 
     // Construct the pipeline
-    const dockerHubSecret = this.setupDockerhubSecret();
-    const pipeline = new cdkpipelines.CodePipeline(this, 'pipeline', {
-      pipelineName: `yivi-issue-server-${props.configuration.branchName}`,
-      crossAccountKeys: true,
-      synth: new cdkpipelines.ShellStep('Synth', {
-        input: repository,
-        env: {
-          BRANCH_NAME: props.configuration.branchName,
-        },
-        commands: [
-          'yarn install --frozen-lockfile',
-          'yarn build',
-        ],
-      }),
-      dockerCredentials: [
-        cdkpipelines.DockerCredential.dockerHub(dockerHubSecret),
-      ],
-    });
+    const pipeline = this.pipeline(repository, props.configuration.branchName);
 
     // This stage must have a branch dependent name as it lives in the gn-build account!
     pipeline.addStage(new DeploymentStage(this, `yivi-issue-server-${props.configuration.branchName}-deployment`, {
@@ -69,10 +52,32 @@ export class PipelineStack extends core.Stack {
 
   }
 
-  setupDockerhubSecret() {
+  pipeline(repository: cdkpipelines.CodePipelineSource, branchName: string) {
+    const dockerHubSecret = this.setupDockerhubSecret(branchName);
+    const pipeline = new cdkpipelines.CodePipeline(this, 'pipeline', {
+      pipelineName: `yivi-issue-server-${branchName}`,
+      crossAccountKeys: true,
+      synth: new cdkpipelines.ShellStep('Synth', {
+        input: repository,
+        env: {
+          BRANCH_NAME: branchName,
+        },
+        commands: [
+          'yarn install --frozen-lockfile',
+          'yarn build',
+        ],
+      }),
+      dockerCredentials: [
+        cdkpipelines.DockerCredential.dockerHub(dockerHubSecret),
+      ],
+    });
+    return pipeline;
+  }
+
+  setupDockerhubSecret(branchName: string) {
     return new secretsmanager.Secret(this, 'dockerhub-secret', {
       description: 'Dockerhub secret for yivi-brp-issue server',
-      secretName: Statics.secretDockerhub,
+      secretName: `${Statics.secretDockerhub}/${branchName}`,
     });
   }
 
