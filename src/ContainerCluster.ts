@@ -369,7 +369,7 @@ export class ContainerClusterStack extends Stack {
     const branch = props.configuration.branchName;
     const ecrRepositoryArn = `arn:aws:ecr:${region}:${account}:repository/yivi-issue-server-${branch}`;
     const ecrRepository = ecr.Repository.fromRepositoryArn(this, 'repository', ecrRepositoryArn);
-    const image = ecs.ContainerImage.fromEcrRepository(ecrRepository);
+    const image = ecs.ContainerImage.fromEcrRepository(ecrRepository, props.configuration.yiviVersionNumber);
 
     // Get secrets
     const apiKey = Secret.fromSecretNameV2(this, 'api-key', Statics.secretsApiKey);
