@@ -34,7 +34,7 @@ export class SecretsStack extends Stack {
     this.allowManagementOfSecret(apiKey);
     this.allowManagementOfSecret(privateKey);
 
-    this.createAdminPolicy(key.keyArn, privateKey.secretArn);
+    this.createAdminPolicy(key.keyArn, privateKey.secretArn, apiKey.secretArn);
   }
 
   allowManagementOfSecret(secret: secrets.Secret) {
