@@ -67,7 +67,7 @@ describe('Private key protection', () => {
         {
           Action: 'secretsmanager:*',
           Condition: {
-            'ForAnyValue:ArnNotLike': {
+            ArnNotLike: {
               'aws:PrincipalArn': [
                 // Alow the Yivi admin federated role from SSO to manage the secret
                 'arn:aws:sts::123456789012:assumed-role/AWSReservedSSO_yivi-admin*',
