@@ -46,7 +46,7 @@ export class SecretsStack extends Stack {
       actions: ['secretsmanager:*'],
       resources: ['*'],
       conditions: {
-        'ForAnyValue:ArnNotLike': {
+        'ArnNotLike': {
           'aws:PrincipalArn': [
             `arn:aws:sts::${account}:assumed-role/AWSReservedSSO_yivi-admin*`,
             `arn:aws:iam::${account}:role/cdk-hnb659fds-cfn-exec-role-${account}-${region}`,
