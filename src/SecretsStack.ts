@@ -34,7 +34,7 @@ export class SecretsStack extends Stack {
     this.allowManagementOfSecret(apiKey);
     this.allowManagementOfSecret(privateKey);
 
-    this.createAdminPolicy(key.keyArn, privateKey.secretArn);
+    this.createAdminPolicy(key.keyArn, privateKey.secretArn, apiKey.secretArn);
   }
 
   allowManagementOfSecret(secret: secrets.Secret) {
@@ -46,7 +46,7 @@ export class SecretsStack extends Stack {
       actions: ['secretsmanager:*'],
       resources: ['*'],
       conditions: {
-        'ForAnyValue:ArnNotLike': {
+        ArnNotLike: {
           'aws:PrincipalArn': [
             `arn:aws:iam::${account}:role/aws-reserved/sso.amazonaws.com/${region}/AWSReservedSSO_yivi-admin*`,
             `arn:aws:iam::${account}:role/cdk-hnb659fds-cfn-exec-role-${account}-${region}`,
