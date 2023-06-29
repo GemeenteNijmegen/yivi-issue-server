@@ -48,7 +48,7 @@ export class SecretsStack extends Stack {
       conditions: {
         ArnNotLike: {
           'aws:PrincipalArn': [
-            `arn:aws:sts::${account}:assumed-role/AWSReservedSSO_yivi-admin*`,
+            `arn:aws:iam::${account}:role/aws-reserved/sso.amazonaws.com/${region}/AWSReservedSSO_yivi-admin*`,
             `arn:aws:iam::${account}:role/cdk-hnb659fds-cfn-exec-role-${account}-${region}`,
             `arn:aws:iam::${account}:role/${Statics.yiviContainerTaskExecutionRoleName}`, // Allow the ECS task to access this secret aswell
           ],
