@@ -61,7 +61,7 @@ export interface Configuration {
 export const configurations: { [key: string]: Configuration } = {
   acceptance: {
     branchName: 'acceptance',
-    yiviVersionNumber: 'v0.12.1',
+    yiviVersionNumber: 'v0.12.6',
     yiviVersionChecksum: 'd772b84c42379fed2a50ce3375ff14522e32dce38298a6797f496db0f5e1d373',
     codeStarConnectionArn: Statics.codeStarConnectionArn,
     deployFromEnvironment: Statics.deploymentEnvironment,
@@ -75,7 +75,7 @@ export const configurations: { [key: string]: Configuration } = {
   },
   main: {
     branchName: 'main',
-    yiviVersionNumber: 'v0.12.1',
+    yiviVersionNumber: 'v0.12.6',
     yiviVersionChecksum: 'd772b84c42379fed2a50ce3375ff14522e32dce38298a6797f496db0f5e1d373',
     codeStarConnectionArn: Statics.codeStarConnectionArn,
     deployFromEnvironment: Statics.deploymentEnvironment,
