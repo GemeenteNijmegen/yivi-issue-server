@@ -151,10 +151,11 @@ export class EcsFargateService extends Construct {
     taskDef.addVolume({ name: VOLUME_NAME });
 
     // The init container will change permissions on the volume
+    // See https://github.com/aws/containers-roadmap/issues/938
     const initContainer = taskDef.addContainer('init-container', {
-      image: ecs.ContainerImage.fromRegistry('busybox:latest'),
+      image: ecs.ContainerImage.fromRegistry('alpine:latest'),
       entryPoint: ['sh', '-c'],
-      command: ['sudo chmod 0777 /storage'],
+      command: ['chmod 0777 /storage'], // TODO check proper restriction
       essential: false, // exit after running
     });
     initContainer.addMountPoints({
