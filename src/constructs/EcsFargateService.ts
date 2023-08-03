@@ -156,6 +156,7 @@ export class EcsFargateService extends Construct {
       image: ecs.ContainerImage.fromRegistry('alpine:latest'),
       entryPoint: ['sh', '-c'],
       command: ['chmod 0777 /storage'], // TODO check proper restriction
+      readonlyRootFilesystem: true,
       essential: false, // exit after running
     });
     initContainer.addMountPoints({
