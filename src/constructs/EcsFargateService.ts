@@ -186,6 +186,7 @@ export class EcsFargateService extends Construct {
     // Make sure the init container runs first
     container.addContainerDependencies({
       container: initContainer,
+      condition: ecs.ContainerDependencyCondition.SUCCESS,
     });
 
     return taskDef;
