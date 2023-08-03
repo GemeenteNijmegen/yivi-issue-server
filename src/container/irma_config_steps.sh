@@ -2,6 +2,7 @@
 
 echo "Setting up irma directory"
 mkdir /storage/irma
+mkdir /storage/irma/irma_configuration
 
 echo "Updating irma_config.json file"
 cp /tmp/irma_config.json /storage/irma/irma_config.json
