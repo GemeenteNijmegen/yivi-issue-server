@@ -1,5 +1,5 @@
 {
-  "schemes_path": "/usr/local/share/irma/irma_configuration",
+  "schemes_path": "/storage/irma/irma_configuration",
   "disable_schemes_update": false,
   "schemes_update": 60,
   "url": "IRMA_GW_URL",

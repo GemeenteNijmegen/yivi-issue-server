@@ -1,7 +1,7 @@
 {
-  "schemes_path": "/usr/local/share/irma/irma_configuration",
+  "schemes_path": "/storage/irma/irma_configuration",
   "disable_schemes_update": false,
-  "privkeys": "/usr/local/share/irma/privatekeys",
+  "privkeys": "/storage/irma/privatekeys",
   "schemes_update": 60,
   "url": "IRMA_GW_URL",
   "DisableTLS": true,
