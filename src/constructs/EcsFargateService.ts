@@ -146,7 +146,27 @@ export class EcsFargateService extends Construct {
       executionRole: this.setupTaskExecutionRole(),
     });
 
-    taskDef.addContainer(`${props.serviceName}-container`, {
+    // Create a volume for the container to write to
+    const VOLUME_NAME = 'issue-container-volume';
+    taskDef.addVolume({ name: VOLUME_NAME });
+
+    // The init container will change permissions on the volume
+    // See https://github.com/aws/containers-roadmap/issues/938
+    const initContainer = taskDef.addContainer('init-container', {
+      image: ecs.ContainerImage.fromRegistry('alpine:latest'),
+      entryPoint: ['sh', '-c'],
+      command: ['chmod 0777 /storage'], // TODO check proper restriction
+      readonlyRootFilesystem: true,
+      essential: false, // exit after running
+    });
+    initContainer.addMountPoints({
+      containerPath: '/storage',
+      readOnly: false,
+      sourceVolume: VOLUME_NAME,
+    });
+
+    // The main container will run the irmago server
+    const container = taskDef.addContainer(`${props.serviceName}-container`, {
       image: props.containerImage,
       logging: new ecs.AwsLogDriver({
         streamPrefix: 'logs',
@@ -155,9 +175,20 @@ export class EcsFargateService extends Construct {
       portMappings: [{
         containerPort: props.containerPort,
       }],
-      readonlyRootFilesystem: false,
+      readonlyRootFilesystem: true,
       secrets: props.secrets,
       environment: props.environment,
+    });
+    container.addMountPoints({
+      containerPath: '/storage',
+      readOnly: false,
+      sourceVolume: VOLUME_NAME,
+    });
+
+    // Make sure the init container runs first
+    container.addContainerDependencies({
+      container: initContainer,
+      condition: ecs.ContainerDependencyCondition.SUCCESS,
     });
 
     return taskDef;
@@ -207,7 +238,6 @@ export class EcsFargateService extends Construct {
       },
       securityGroups: props.securityGroups,
     });
-
 
     service.node.addDependency(props.ecsCluster);
     return service;
