@@ -94,10 +94,6 @@
       "type": "runtime"
     },
     {
-      "name": "cdk-ecr-deployment",
-      "type": "runtime"
-    },
-    {
       "name": "cdk-nag",
       "type": "runtime"
     },

@@ -8,7 +8,6 @@ const project = new GemeenteNijmegenCdkApp({
     '@gemeentenijmegen/aws-constructs',
     'cdk-nag',
     'cdk-remote-stack',
-    'cdk-ecr-deployment',
   ],
   githubOptions: {
     mergify: false,

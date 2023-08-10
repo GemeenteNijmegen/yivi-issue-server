@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import {
   Stack, Fn, Aws, StackProps,
   aws_ecs as ecs,
@@ -10,9 +11,9 @@ import {
   aws_apigateway as apigateway,
   aws_iam as iam,
   aws_logs as logs,
-  aws_ecr as ecr,
   Duration,
 } from 'aws-cdk-lib';
+import { DockerImageAsset } from 'aws-cdk-lib/aws-ecr-assets';
 import { Secret } from 'aws-cdk-lib/aws-secretsmanager';
 import { Construct } from 'constructs';
 import { Configurable } from './Configuration';
@@ -96,74 +97,6 @@ export class ContainerClusterStack extends Stack {
         'method.request.header.irma-authorization': true,
       },
     });
-
-    // const sessionToken = session.addResource('{token}');
-
-    // DELETE /session/{token} (NOT USED)
-    // const tokenIntegration = new apigateway.Integration({
-    //   type: apigateway.IntegrationType.HTTP_PROXY,
-    //   integrationHttpMethod: 'ANY',
-    //   uri: `https://alb.${this.hostedzone.zoneName}/session/{token}`,
-    //   options: {
-    //     vpcLink: vpclink,
-    //     timeout: Duration.seconds(6),
-    //     requestParameters: {
-    //       'integration.request.header.authorization': 'method.request.header.irma-authorization',
-    //       'integration.request.path.token': 'method.request.path.token',
-    //     },
-    //   },
-    // });
-    // sessionToken.addMethod('DELETE', tokenIntegration, {
-    //   authorizationType: apigateway.AuthorizationType.IAM,
-    //   requestParameters: {
-    //     'method.request.header.irma-authorization': true,
-    //     'method.request.path.token': true,
-    //   },
-    // });
-
-    // GET /session/{token}/result (NOT USED)
-    // const resultIntegration = new apigateway.Integration({
-    //   type: apigateway.IntegrationType.HTTP_PROXY,
-    //   integrationHttpMethod: 'ANY',
-    //   uri: `https://alb.${this.hostedzone.zoneName}/session/{token}/result`,
-    //   options: {
-    //     vpcLink: vpclink,
-    //     timeout: Duration.seconds(6),
-    //     requestParameters: {
-    //       'integration.request.header.authorization': 'method.request.header.irma-authorization',
-    //       'integration.request.path.token': 'method.request.path.token',
-    //     },
-    //   },
-    // });
-    // sessionToken.addResource('result').addMethod('GET', resultIntegration, {
-    //   authorizationType: apigateway.AuthorizationType.IAM,
-    //   requestParameters: {
-    //     'method.request.header.irma-authorization': true,
-    //     'method.request.path.token': true,
-    //   }
-    // });
-
-    // GET /session/{token}/status (NOT USED)
-    // const statusIntegration = new apigateway.Integration({
-    //   type: apigateway.IntegrationType.HTTP_PROXY,
-    //   integrationHttpMethod: 'ANY',
-    //   uri: `https://alb.${this.hostedzone.zoneName}/session/{token}/status`,
-    //   options: {
-    //     vpcLink: vpclink,
-    //     timeout: Duration.seconds(6),
-    //     requestParameters: {
-    //       'integration.request.header.authorization': 'method.request.header.irma-authorization',
-    //       'integration.request.path.token': 'method.request.path.token',
-    //     },
-    //   },
-    // });
-    // sessionToken.addResource('status').addMethod('GET', statusIntegration, {
-    //   authorizationType: apigateway.AuthorizationType.IAM,
-    //   requestParameters: {
-    //     'method.request.header.irma-authorization': true,
-    //     'method.request.path.token': true,
-    //   }
-    // });
 
   }
 
@@ -363,13 +296,8 @@ export class ContainerClusterStack extends Stack {
     listner: loadbalancing.NetworkListener,
   ) {
 
-    // Define the image to use for the service
-    const region = props.configuration.deployFromEnvironment.region;
-    const account = props.configuration.deployFromEnvironment.account;
-    const branch = props.configuration.branchName;
-    const ecrRepositoryArn = `arn:aws:ecr:${region}:${account}:repository/yivi-issue-server-${branch}`;
-    const ecrRepository = ecr.Repository.fromRepositoryArn(this, 'repository', ecrRepositoryArn);
-    const image = ecs.ContainerImage.fromEcrRepository(ecrRepository, props.configuration.yiviVersionNumber);
+    const asset = this.buildContainer(props);
+    const image = ecs.ContainerImage.fromDockerImageAsset(asset);
 
     // Get secrets
     const apiKey = Secret.fromSecretNameV2(this, 'api-key', Statics.secretsApiKey);
@@ -416,7 +344,29 @@ export class ContainerClusterStack extends Stack {
     service.allowToDecryptUsingKey(protectionKeyArn);
     privateKey.grantRead(role);
     apiKey.grantRead(role);
+    asset.repository.grantPull(role);
 
+  }
+
+  /**
+   * Build an docker image asset.
+   * Name it using the irmogo version and a random uuid.
+   * Note on inspector scanning: the image is placed in the cdk-assets ECR repository,
+   * Inspector scans this repository and findings are published to SecurityHub.
+   * @param props
+   * @returns
+   */
+  buildContainer(props: ContainerClusterStackProps) {
+    const img = new DockerImageAsset(this, 'image', {
+      directory: './src/container',
+      assetName: `irmago-${props.configuration.yiviVersionNumber}-${crypto.randomUUID()}`,
+      buildArgs: {
+        BUILD_FOR_ENVIRONMENT: props.configuration.branchName,
+        IRMA_VERSION: props.configuration.yiviVersionNumber,
+        IRMA_CHECKSUM: props.configuration.yiviVersionChecksum,
+      },
+    });
+    return img;
   }
 
 
