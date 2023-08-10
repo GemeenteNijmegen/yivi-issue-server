@@ -19,6 +19,7 @@ const testConfiguration: Configuration = {
   sessionEndpointIamUser: true,
   yiviVersionChecksum: 'weugiwegweh',
   yiviVersionNumber: 'v0.1.13.0',
+  alpineLinuxVersion: 'v0.1.13.0',
 };
 
 

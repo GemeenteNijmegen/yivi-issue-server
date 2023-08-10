@@ -25,6 +25,7 @@ test('ApiStage cdk-nag', () => {
       sessionEndpointIamUser: true,
       yiviVersionChecksum: 'weiweojgwoei23',
       yiviVersionNumber: 'v0.1.2',
+      alpineLinuxVersion: 'v0.1.2',
     },
   });
 
