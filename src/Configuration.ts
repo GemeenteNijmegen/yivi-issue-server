@@ -56,6 +56,12 @@ export interface Configuration {
    */
   useSpotInstances?: boolean;
 
+  /**
+   * Alpine linux version
+   * Note: add this so we can have predictable builds
+   */
+  alpineLinuxVersion: string;
+
 }
 
 export const configurations: { [key: string]: Configuration } = {
@@ -63,6 +69,7 @@ export const configurations: { [key: string]: Configuration } = {
     branchName: 'acceptance',
     yiviVersionNumber: 'v0.12.6',
     yiviVersionChecksum: 'e3800ba7fce83b9c9e771f43b7d3ea5be7755f20ca68cb56e26ef1cc84af7d9b',
+    alpineLinuxVersion: '3.18.3',
     codeStarConnectionArn: Statics.codeStarConnectionArn,
     deployFromEnvironment: Statics.deploymentEnvironment,
     deployToEnvironment: Statics.acceptanceEnvironment,
@@ -77,6 +84,7 @@ export const configurations: { [key: string]: Configuration } = {
     branchName: 'main',
     yiviVersionNumber: 'v0.12.6',
     yiviVersionChecksum: 'e3800ba7fce83b9c9e771f43b7d3ea5be7755f20ca68cb56e26ef1cc84af7d9b',
+    alpineLinuxVersion: '3.18.3',
     codeStarConnectionArn: Statics.codeStarConnectionArn,
     deployFromEnvironment: Statics.deploymentEnvironment,
     deployToEnvironment: Statics.productionEnvironment,

@@ -1,4 +1,3 @@
-import * as crypto from 'crypto';
 import {
   Stack, Fn, Aws, StackProps,
   aws_ecs as ecs,
@@ -359,11 +358,11 @@ export class ContainerClusterStack extends Stack {
   buildContainer(props: ContainerClusterStackProps) {
     const img = new DockerImageAsset(this, 'image', {
       directory: './src/container',
-      assetName: `irmago-${props.configuration.yiviVersionNumber}-${crypto.randomUUID()}`,
       buildArgs: {
         BUILD_FOR_ENVIRONMENT: props.configuration.branchName,
         IRMA_VERSION: props.configuration.yiviVersionNumber,
         IRMA_CHECKSUM: props.configuration.yiviVersionChecksum,
+        ALPINE_VERSION: props.configuration.alpineLinuxVersion,
       },
     });
     return img;
