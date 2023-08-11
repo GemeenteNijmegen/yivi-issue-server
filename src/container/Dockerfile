@@ -1,16 +1,18 @@
 # BUILD IMAGE
-FROM alpine:3 as getter
+ARG ALPINE_VERSION
+
+FROM alpine:${ALPINE_VERSION} as getter
 
 ARG IRMA_VERSION
 ARG IRMA_CHECKSUM
- 
+
 RUN wget -q -O /irma https://github.com/privacybydesign/irmago/releases/download/${IRMA_VERSION}/irma-linux-amd64 && \
     echo "${IRMA_CHECKSUM}  /irma" | sha256sum -c && \
     chmod 0755 /irma && \
     /irma version
 
 # CONTAINER IMAGE
-FROM alpine:3
+FROM alpine:${ALPINE_VERSION}
 
 ARG BUILD_FOR_ENVIRONMENT
 

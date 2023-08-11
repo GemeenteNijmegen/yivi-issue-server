@@ -20,6 +20,7 @@ export interface Configuration {
 
   /**
    * Checksum of the IRMA GO executable
+   * You can obtain the checksum by downloading the irma-linux-amd64 binary release and calculating it locally
    */
   yiviVersionChecksum: string;
 
@@ -56,13 +57,20 @@ export interface Configuration {
    */
   useSpotInstances?: boolean;
 
+  /**
+   * Alpine linux version
+   * Note: add this so we can have predictable builds
+   */
+  alpineLinuxVersion: string;
+
 }
 
 export const configurations: { [key: string]: Configuration } = {
   acceptance: {
     branchName: 'acceptance',
-    yiviVersionNumber: 'v0.12.6',
-    yiviVersionChecksum: 'e3800ba7fce83b9c9e771f43b7d3ea5be7755f20ca68cb56e26ef1cc84af7d9b',
+    yiviVersionNumber: 'v0.13.0',
+    yiviVersionChecksum: '44f9398e6a98b9a52ecac71f29fad0162810704f75a442fafba9e6a3a178edb4',
+    alpineLinuxVersion: '3.18.3',
     codeStarConnectionArn: Statics.codeStarConnectionArn,
     deployFromEnvironment: Statics.deploymentEnvironment,
     deployToEnvironment: Statics.acceptanceEnvironment,
@@ -75,8 +83,9 @@ export const configurations: { [key: string]: Configuration } = {
   },
   main: {
     branchName: 'main',
-    yiviVersionNumber: 'v0.12.6',
-    yiviVersionChecksum: 'e3800ba7fce83b9c9e771f43b7d3ea5be7755f20ca68cb56e26ef1cc84af7d9b',
+    yiviVersionNumber: 'v0.13.0',
+    yiviVersionChecksum: '44f9398e6a98b9a52ecac71f29fad0162810704f75a442fafba9e6a3a178edb4',
+    alpineLinuxVersion: '3.18.3',
     codeStarConnectionArn: Statics.codeStarConnectionArn,
     deployFromEnvironment: Statics.deploymentEnvironment,
     deployToEnvironment: Statics.productionEnvironment,
