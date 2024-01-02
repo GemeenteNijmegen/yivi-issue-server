@@ -158,6 +158,9 @@ export class EcsFargateService extends Construct {
       command: ['chmod 0777 /storage'], // TODO check proper restriction
       readonlyRootFilesystem: true,
       essential: false, // exit after running
+      logging: ecs.LogDriver.awsLogs({
+        streamPrefix: 'init',
+      }),
     });
     initContainer.addMountPoints({
       containerPath: '/storage',
