@@ -5,7 +5,7 @@
   "url": "IRMA_GW_URL",
   "DisableTLS": true,
   "EnableSSE": false,
-  "verbose": 0,
+  "verbose": 8,
   "quiet": false,
   "log_json": true,
   "production": true,
