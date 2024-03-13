@@ -6,6 +6,7 @@
   "url": "IRMA_GW_URL",
   "DisableTLS": true,
   "EnableSSE": false,
+  "verbose": 0,
   "quiet": false,
   "log_json": true,
   "production": true,
