@@ -1457,10 +1457,10 @@ case@1.6.3, case@^1.6.3:
   resolved "https://registry.yarnpkg.com/case/-/case-1.6.3.tgz#0a4386e3e9825351ca2e6216c60467ff5f1ea1c9"
   integrity sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==
 
-cdk-nag@^2.28.93:
-  version "2.28.93"
-  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.28.93.tgz#6c96198a5496b467c77f5917595d633bfb02f357"
-  integrity sha512-qSrp8tRqFm4L+8TggkCg7ahBYoSzXfOWYRYddw8taAvy4D3ULOt/8vlfLVInx59GlepiEvXkUOzbNYP4VFELNw==
+cdk-nag@^2.28.94:
+  version "2.28.94"
+  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.28.94.tgz#c14a3e4ffc32b7463e679c081e32e3fd3738554c"
+  integrity sha512-Q+vq+26CBna3dlEMmilZi/+Me2dkEhFm9CUEWMy5z2A2JAYQ83cq8KxWYlgeuSCXwr2yZkc8veV215gu3m5nKQ==
 
 cdk-remote-stack@^2.0.101:
   version "2.0.101"
