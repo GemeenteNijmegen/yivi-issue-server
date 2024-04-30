@@ -69,9 +69,9 @@ export interface Configuration {
 export const configurations: { [key: string]: Configuration } = {
   acceptance: {
     branchName: 'acceptance',
-    yiviVersionNumber: 'v0.15.1',
-    yiviVersionChecksum: '27182cc8203234eca14b60fe488c1157fce0d1385410a83216436418d5b03a52',
-    alpineLinuxVersion: '3.19.0',
+    yiviVersionNumber: 'v0.15.2',
+    yiviVersionChecksum: '4dc70a8067c15e4e82dd69da8a5cb464056ac9f3441d0d0bffe4374cd055d62a',
+    alpineLinuxVersion: '3.19.1',
     codeStarConnectionArn: Statics.codeStarConnectionArn,
     deployFromEnvironment: Statics.deploymentEnvironment,
     deployToEnvironment: Statics.acceptanceEnvironment,
@@ -84,9 +84,9 @@ export const configurations: { [key: string]: Configuration } = {
   },
   main: {
     branchName: 'main',
-    yiviVersionNumber: 'v0.15.1',
-    yiviVersionChecksum: '27182cc8203234eca14b60fe488c1157fce0d1385410a83216436418d5b03a52',
-    alpineLinuxVersion: '3.19.0',
+    yiviVersionNumber: 'v0.15.2',
+    yiviVersionChecksum: '4dc70a8067c15e4e82dd69da8a5cb464056ac9f3441d0d0bffe4374cd055d62a',
+    alpineLinuxVersion: '3.19.1',
     codeStarConnectionArn: Statics.codeStarConnectionArn,
     deployFromEnvironment: Statics.deploymentEnvironment,
     deployToEnvironment: Statics.productionEnvironment,
