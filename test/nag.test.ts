@@ -3,6 +3,7 @@ import { Annotations, Match } from 'aws-cdk-lib/assertions';
 import { SynthesisMessage } from 'aws-cdk-lib/cx-api';
 import { AwsSolutionsChecks } from 'cdk-nag';
 import { ApiStage } from '../src/ApiStage';
+import { Criticality } from '../src/Criticality';
 import { Statics } from '../src/Statics';
 
 const dummyEnv = {
@@ -26,6 +27,7 @@ test('ApiStage cdk-nag', () => {
       yiviVersionChecksum: 'weiweojgwoei23',
       yiviVersionNumber: 'v0.1.2',
       alpineLinuxVersion: 'v0.1.2',
+      criticality: new Criticality('high'),
     },
   });
 

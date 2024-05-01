@@ -1,4 +1,5 @@
 import { Environment } from 'aws-cdk-lib';
+import { Criticality } from './Criticality';
 import { Statics } from './Statics';
 
 export interface Configurable {
@@ -64,6 +65,11 @@ export interface Configuration {
    */
   alpineLinuxVersion: string;
 
+  /**
+   * The base level of severity for this project.
+   */
+  criticality: Criticality;
+
 }
 
 export const configurations: { [key: string]: Configuration } = {
@@ -81,6 +87,7 @@ export const configurations: { [key: string]: Configuration } = {
     ],
     sessionEndpointIamUser: true,
     useSpotInstances: true,
+    criticality: new Criticality('medium'),
   },
   main: {
     branchName: 'main',
@@ -94,6 +101,7 @@ export const configurations: { [key: string]: Configuration } = {
       // This cannot be used currently (webapp does not offer support yet)
     ],
     sessionEndpointIamUser: true,
+    criticality: new Criticality('high'),
   },
 };
 

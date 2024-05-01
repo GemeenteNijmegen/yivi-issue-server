@@ -329,6 +329,7 @@ export class ContainerClusterStack extends Stack {
         IRMA_TOKEN: ecs.Secret.fromSecretsManager(apiKey),
         IRMA_GEMEENTE_PRIVKEY: ecs.Secret.fromSecretsManager(privateKey),
       },
+      criticality: props.configuration.criticality,
       environment: {
         IRMA_GW_URL: this.hostedzone.zoneName, // protocol prefix is added in the container
       },

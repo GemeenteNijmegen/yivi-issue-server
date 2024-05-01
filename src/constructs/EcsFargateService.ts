@@ -1,3 +1,4 @@
+import { ErrorMonitoringAlarm } from '@gemeentenijmegen/aws-constructs';
 import {
   aws_logs as logs,
   aws_ecs as ecs,
@@ -7,6 +8,7 @@ import {
 } from 'aws-cdk-lib';
 import { SecurityGroup, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import { Construct } from 'constructs';
+import { Criticality } from '../Criticality';
 import { Statics } from '../Statics';
 
 const ALARM_THRESHOLD = 70;
@@ -74,6 +76,10 @@ export interface EcsFargateServiceProps {
     mem: '512' | '1024'| '2048' | '4096';
   };
 
+  /**
+   * Provide a criticality for the service
+   */
+  criticality: Criticality;
 }
 
 /**
@@ -128,6 +134,11 @@ export class EcsFargateService extends Construct {
   private logGroup(props: EcsFargateServiceProps) {
     const logGroup = new logs.LogGroup(this, `${props.serviceName}-logs`, {
       retention: logs.RetentionDays.ONE_MONTH,
+    });
+
+    new ErrorMonitoringAlarm(this, 'error-monitoring', {
+      criticality: props.criticality.toString(),
+      logGroup: logGroup,
     });
     return logGroup;
   }
@@ -251,7 +262,9 @@ export class EcsFargateService extends Construct {
    * @param props
    */
   private setupContainerMonitoring(props: EcsFargateServiceProps) {
+    const medium = new Criticality('medium');
     new cloudwatch.Alarm(this, `${props.serviceName}-cpu-util-alarm`, {
+      alarmName: `cpu-utilization-yivi-container${medium.getAlarmSuffix()}`,
       metric: this.service.metricCpuUtilization(),
       alarmDescription: `Alarm on CPU utilization for ${props.serviceName}`,
       threshold: ALARM_THRESHOLD,
@@ -261,6 +274,7 @@ export class EcsFargateService extends Construct {
     });
 
     new cloudwatch.Alarm(this, `${props.serviceName}-memory-util-alarm`, {
+      alarmName: `memory-utilization-yivi-container${medium.getAlarmSuffix()}`,
       metric: this.service.metricMemoryUtilization(),
       alarmDescription: `Alarm on memory utilization for ${props.serviceName}`,
       threshold: ALARM_THRESHOLD,
