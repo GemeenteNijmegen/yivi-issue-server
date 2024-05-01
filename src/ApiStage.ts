@@ -22,7 +22,7 @@ export class ApiStage extends Stage {
 
     const secretsStack = new SecretsStack(this, 'secrets-stack', {
       env: props.configuration.deployToEnvironment,
-      description: 'Secret for yivi-issue-server (including private key alarms)',
+      description: 'Secret for yivi-issue-server',
     });
 
     const dnsStack = new DnsStack(this, 'dns-stack', {

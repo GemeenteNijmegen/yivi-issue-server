@@ -3,6 +3,7 @@ import { App } from 'aws-cdk-lib';
 import { Template } from 'aws-cdk-lib/assertions';
 import { ApiStage } from '../src/ApiStage';
 import { Configuration } from '../src/Configuration';
+import { Criticality } from '../src/Criticality';
 import { Statics } from '../src/Statics';
 
 const dummyEnv = {
@@ -20,6 +21,7 @@ const testConfiguration: Configuration = {
   yiviVersionChecksum: 'weugiwegweh',
   yiviVersionNumber: 'v0.1.13.0',
   alpineLinuxVersion: 'v0.1.13.0',
+  criticality: new Criticality('high'),
 };
 
 
