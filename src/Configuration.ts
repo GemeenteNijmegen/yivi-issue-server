@@ -84,7 +84,7 @@ export const configurations: { [key: string]: Configuration } = {
     sessionEndpointAllowList: [
       'arn:aws:iam::699363516011:role/yivi-issue-api-api-stack-yiviissueissuefunctionlam-1AAD4D76XTRK5',
     ],
-    sessionEndpointIamUser: true,
+    sessionEndpointIamUser: false,
     useSpotInstances: true,
     criticality: new Criticality('medium'),
   },
@@ -99,7 +99,7 @@ export const configurations: { [key: string]: Configuration } = {
     sessionEndpointAllowList: [
       'arn:aws:iam::185512167111:role/yivi-issue-api-api-stack-yiviissueissuefunctionlam-TFTCG5EPAX36',
     ],
-    sessionEndpointIamUser: true,
+    sessionEndpointIamUser: false,
     criticality: new Criticality('high'),
   },
 };
