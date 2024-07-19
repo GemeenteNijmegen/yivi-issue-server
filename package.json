@@ -42,15 +42,15 @@
     "jest-junit": "^15",
     "projen": "^0.82.8",
     "standard-version": "^9",
-    "ts-jest": "^29.2.2",
+    "ts-jest": "^29.2.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.3"
   },
   "dependencies": {
     "@gemeentenijmegen/aws-constructs": "^0.0.15",
     "aws-cdk-lib": "^2.1.0",
-    "cdk-nag": "^2.28.160",
-    "cdk-remote-stack": "^2.0.101",
+    "cdk-nag": "^2.28.161",
+    "cdk-remote-stack": "^2.1.0",
     "constructs": "^10.0.5"
   },
   "license": "EUPL-1.2",
