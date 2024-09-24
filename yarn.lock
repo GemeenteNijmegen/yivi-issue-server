@@ -483,10 +483,10 @@
   resolved "https://registry.yarnpkg.com/@gemeentenijmegen/aws-constructs/-/aws-constructs-0.0.21.tgz#91ed5a000de89c83819829e08fee3e3029d82375"
   integrity sha512-qJ+93MSaGHPD0VHjl2QV4lr4njhd6ZlpvPjdzyHrdCc3x7gNJ2QKHU+rWmF5ufnB/1jhVG3EMevrHGXGtR1kGQ==
 
-"@gemeentenijmegen/projen-project-type@^1.8.0":
-  version "1.8.0"
-  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/projen-project-type/-/projen-project-type-1.8.0.tgz#856c78b870912cc173297fb30d218fbde217312f"
-  integrity sha512-IN4B+MM65V2xaKYa9qR4aaZlmi2rdygXyMy3sgjyia6wmOe/6/1ZqNm4dHIDW2YTzjjSpOu24S2tUkNMJuwPjw==
+"@gemeentenijmegen/projen-project-type@^1.8.1":
+  version "1.8.1"
+  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/projen-project-type/-/projen-project-type-1.8.1.tgz#4d21358f33e341b082ec88ec9fddcb6457100608"
+  integrity sha512-w3w8Q8gVQbNQOKl8962iboMoBCH8gxmCC9xO4c5npYj22caAoVRP1JQfIOf+E6bQzXKKakqMsfqWtLb8CX03aA==
 
 "@humanwhocodes/config-array@^0.13.0":
   version "0.13.0"
@@ -4204,10 +4204,10 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-projen@^0.87.4:
-  version "0.87.4"
-  resolved "https://registry.yarnpkg.com/projen/-/projen-0.87.4.tgz#97da75d7893a28ea110b887215975c50a7d6d160"
-  integrity sha512-PJA8xQubV/1x5S4xbP2uazpkTd5zYb7JqEprGxNZ+KNsWUab0MK2cXeYgW6zp/xpITiD+l9Z0fR5TG83OyU6nQ==
+projen@^0.88.0:
+  version "0.88.0"
+  resolved "https://registry.yarnpkg.com/projen/-/projen-0.88.0.tgz#4e3664fddc7fc0614827981c221e65776dbda390"
+  integrity sha512-7A6OAgL7Gz6R2yWMUlqMqZw7r5jOeqfpNLg+BZbLg3UXbtPsdOjPDp0NroGXxFkqW7NcVPzs7/lF7DZ6H9pRSQ==
   dependencies:
     "@iarna/toml" "^2.2.5"
     case "^1.6.3"
