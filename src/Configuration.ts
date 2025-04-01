@@ -76,7 +76,7 @@ export const configurations: { [key: string]: Configuration } = {
   acceptance: {
     branchName: 'acceptance',
     yiviVersionNumber: 'v0.17.1',
-    yiviVersionChecksum: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+    yiviVersionChecksum: '8a4203be0c0a4ae9062279f2a833c479b4e9932b94617e3d4201ee4e19283484',
     alpineLinuxVersion: '3.21.3',
     codeStarConnectionArn: Statics.codeStarConnectionArn,
     deployFromEnvironment: Statics.deploymentEnvironment,
