@@ -75,7 +75,7 @@ export interface Configuration {
 export const configurations: { [key: string]: Configuration } = {
   acceptance: {
     branchName: 'acceptance',
-    yiviVersionNumber: 'v0.16.0',
+    yiviVersionNumber: 'v0.17.1',
     yiviVersionChecksum: '5d999db2f8484c09a293e56f822188e81eeec86c3ac75285312409cc5fddc7da',
     alpineLinuxVersion: '3.21.3',
     codeStarConnectionArn: Statics.codeStarConnectionArn,
