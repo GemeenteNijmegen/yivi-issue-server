@@ -45,12 +45,12 @@
     "projen": "^0.91.20",
     "ts-jest": "^29.3.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "@gemeentenijmegen/aws-constructs": "^0.0.32",
     "aws-cdk-lib": "^2.1.0",
-    "cdk-nag": "^2.35.63",
+    "cdk-nag": "^2.35.64",
     "cdk-remote-stack": "^2.1.0",
     "constructs": "^10.0.5"
   },
