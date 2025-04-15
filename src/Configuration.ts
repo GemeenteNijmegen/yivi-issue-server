@@ -90,8 +90,8 @@ export const configurations: { [key: string]: Configuration } = {
   },
   main: {
     branchName: 'main',
-    yiviVersionNumber: 'v0.17.1',
-    yiviVersionChecksum: '8a4203be0c0a4ae9062279f2a833c479b4e9932b94617e3d4201ee4e19283484',
+    yiviVersionNumber: 'v0.18.1',
+    yiviVersionChecksum: '0006dd9c7ece2d193a3fc73fc31e2747a63d739a291a76c389f494b32da5c865',
     alpineLinuxVersion: '3.21.3',
     codeStarConnectionArn: Statics.codeStarConnectionArn,
     deployFromEnvironment: Statics.deploymentEnvironment,
