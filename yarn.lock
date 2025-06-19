@@ -32,9 +32,9 @@
   integrity sha512-7bY3J8GCVxLupn/kNmpPc5VJz8grx+4RKfnnJiO1LG+uxkZfANZG3RMHhE+qQxxwkyQ9/MfPtTpf748UhR425A==
 
 "@aws-cdk/cloud-assembly-schema@^44.2.0":
-  version "44.5.0"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/cloud-assembly-schema/-/cloud-assembly-schema-44.5.0.tgz#475b4997977c1e3f8ebc379823259f4c85986ce8"
-  integrity sha512-/dk9YtqF+BnBS6k4m7YWIp7Pd80m7jdjT8ED8gb3Rd9hAuAEUoJubO0M3EOlLFmknIesQNm95LYU6vt/MIQhWg==
+  version "44.6.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/cloud-assembly-schema/-/cloud-assembly-schema-44.6.0.tgz#06bf0633ee92d8b3e77cbd96bbbf0ace757e006b"
+  integrity sha512-oH1I2/hf+5PJtilXZqbf5G0q4C1WXfu65mqFmBujwwdL/rtfJcgY5H5OS3EDwNXTZ726+UuXbNHKpaNLEs7VUA==
   dependencies:
     jsonschema "~1.4.1"
     semver "^7.7.2"
@@ -562,15 +562,15 @@
     "@eslint/core" "^0.15.0"
     levn "^0.4.1"
 
-"@gemeentenijmegen/aws-constructs@^0.0.36":
-  version "0.0.36"
-  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/aws-constructs/-/aws-constructs-0.0.36.tgz#fcf4cf54004ef6da3da8a08c59c662eca75f5caa"
-  integrity sha512-GgnQlBP5v8yYHlqrwqRBC/b6CV/NcZ35OsALt0M3C3tAh9a+NVXyVaQwl4dSn4cgek8qzNDgl/Ux9Oqtune1sQ==
+"@gemeentenijmegen/aws-constructs@^0.0.37":
+  version "0.0.37"
+  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/aws-constructs/-/aws-constructs-0.0.37.tgz#64768d75e5d34febae8764abd08dfc83647c3bce"
+  integrity sha512-HhB5AYADkbQSaYPfusjEO5PZduH5uEl+dxG5p7Junbr1tKvlWgQXrlZVpxImWHGuEiFmIRwugJ9XIWfAIUKQQg==
 
-"@gemeentenijmegen/projen-project-type@^1.10.5":
-  version "1.10.5"
-  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/projen-project-type/-/projen-project-type-1.10.5.tgz#811b685a683f3877eb08fc665ad44f4c5c9f1724"
-  integrity sha512-yzcT8xv6Ju/J8AAW9tt7Re+RHfJ5iwxrrsyqJCt5J3DxdsZijpKr4AP2bokdue9lpLLZy/xkS+69qZ/6xs7y1w==
+"@gemeentenijmegen/projen-project-type@^1.10.6":
+  version "1.10.6"
+  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/projen-project-type/-/projen-project-type-1.10.6.tgz#18ae451317a9abb89a4bed65b1e9c474eb9a3430"
+  integrity sha512-J+qx07M9FTjNH0eEFmAZl0mHV9IuhNOD5Dh4RIPHnQpHFZmHNrkL2OJKMLaU2PpRsF3d0jSh1cv8TMXHFfBQ7A==
 
 "@humanfs/core@^0.19.1":
   version "0.19.1"
@@ -1728,10 +1728,10 @@ case@1.6.3, case@^1.6.3:
   resolved "https://registry.yarnpkg.com/case/-/case-1.6.3.tgz#0a4386e3e9825351ca2e6216c60467ff5f1ea1c9"
   integrity sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==
 
-cdk-nag@^2.36.19:
-  version "2.36.19"
-  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.36.19.tgz#02f9ca8360aa8b447c78f8dbac3101a61ab58fc1"
-  integrity sha512-L0r3FIIbhesrxWow5Y0wbrH6PYRUxRGY4wlsCDtgxkrpq1V9FDmp8GcCAV7ELUUmotmbVeC1AbyzG2Cj4I0tXg==
+cdk-nag@^2.36.20:
+  version "2.36.20"
+  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.36.20.tgz#53b25b7d10efa0f5a99e5cc1825b9a86f18342a0"
+  integrity sha512-2nuWSfL/U+/U+cwUYWZ1IMmMON8XRywu29bnbxWI6iI+32XByE1aNQrFI1Ph0XvUThah8uBaC+twRXmMoTosIg==
 
 cdk-remote-stack@^2.1.0:
   version "2.1.0"
@@ -2259,9 +2259,9 @@ ejs@^3.1.10:
     jake "^10.8.5"
 
 electron-to-chromium@^1.5.160:
-  version "1.5.169"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.169.tgz#6afdfd8e701b7ab744e2bb0cfdec3cefc1072cbe"
-  integrity sha512-q7SQx6mkLy0GTJK9K9OiWeaBMV4XQtBSdf6MJUzDB/H/5tFXfIiX38Lci1Kl6SsgiEhz1SQI1ejEOU5asWEhwQ==
+  version "1.5.170"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.170.tgz#9f6697de4339e24da8b234e4492a9ecb91f5989c"
+  integrity sha512-GP+M7aeluQo9uAyiTCxgIj/j+PrWhMlY7LFVj8prlsPljd0Fdg9AprlfUi+OCSFWy9Y5/2D/Jrj9HS8Z4rpKWA==
 
 emittery@^0.13.1:
   version "0.13.1"
