@@ -50,7 +50,7 @@
   "dependencies": {
     "@gemeentenijmegen/aws-constructs": "^0.0.37",
     "aws-cdk-lib": "^2.1.0",
-    "cdk-nag": "^2.36.29",
+    "cdk-nag": "^2.36.30",
     "cdk-remote-stack": "^2.1.0",
     "constructs": "^10.0.5"
   },
