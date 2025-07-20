@@ -36,7 +36,7 @@
     "@typescript-eslint/parser": "^8",
     "aws-cdk": "^2",
     "commit-and-tag-version": "^12",
-    "esbuild": "^0.25.7",
+    "esbuild": "^0.25.8",
     "eslint": "^9",
     "eslint-import-resolver-typescript": "^3.10.1",
     "eslint-plugin-import": "^2.32.0",
@@ -50,7 +50,7 @@
   "dependencies": {
     "@gemeentenijmegen/aws-constructs": "^0.0.40",
     "aws-cdk-lib": "^2.1.0",
-    "cdk-nag": "^2.36.40",
+    "cdk-nag": "^2.36.41",
     "cdk-remote-stack": "^2.1.0",
     "constructs": "^10.0.5"
   },
