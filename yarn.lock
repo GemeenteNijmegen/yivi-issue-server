@@ -564,10 +564,10 @@
   resolved "https://registry.yarnpkg.com/@gemeentenijmegen/aws-constructs/-/aws-constructs-0.0.43.tgz#593c7ce07e33a41411dc7e6cb3df880196892687"
   integrity sha512-9GD8Rm+6VOPyGF5UCOIazQTcCrPlUWJdT+oku8eo0J677Gpq7ttfeA52CrQfrIyknDCgKrNiw83Eg2yJ8N662Q==
 
-"@gemeentenijmegen/projen-project-type@^1.11.4":
-  version "1.11.4"
-  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/projen-project-type/-/projen-project-type-1.11.4.tgz#83fc15474e3ce85ecec5a08f022c8723608e9f42"
-  integrity sha512-pz+VwXAVxWlVQxZI5FxZ7lj5LvNmoJhBcLp7W608s2zOCTTwOvMQbsF1qbHvsTwk4vm9dQKbVeSYX4OZ8FgSUw==
+"@gemeentenijmegen/projen-project-type@^1.11.5":
+  version "1.11.5"
+  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/projen-project-type/-/projen-project-type-1.11.5.tgz#d2efab6701b8dc79f319af984782252f8c8e1942"
+  integrity sha512-81Uld1y44R+u//MmOZ407K3FxqpajhmhHlwE7IhOTRXLk4hzVetIQo6kM3X/CzHRFsMOI8nM9c4hg/gzcIcN9Q==
 
 "@humanfs/core@^0.19.1":
   version "0.19.1"
@@ -1513,9 +1513,9 @@ available-typed-arrays@^1.0.7:
     possible-typed-array-names "^1.0.0"
 
 aws-cdk-lib@^2.1.0:
-  version "2.219.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.219.0.tgz#248431a1a7fe1d5e560b9026f7540d4e847404bd"
-  integrity sha512-Rq1/f3exfFEWee1znNq8yvR1TuRQ4xQZz3JNkliBW9dFwyrDe7l/dmlAf6DVvB3nuiZAaUS+vh4ua1LZ7Ec8kg==
+  version "2.220.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.220.0.tgz#29bb835fab5052e59608221f9be103e65ba9fe60"
+  integrity sha512-mOEyPP1ymWiLnSE0xFxWjG00E1DQ5wtbcgKUmtGjxyNdoG/Qret1nDLqE43YGZEbwca43WO/a2LDuSL6+hN7Lg==
   dependencies:
     "@aws-cdk/asset-awscli-v1" "2.2.242"
     "@aws-cdk/asset-node-proxy-agent-v6" "^2.1.0"
@@ -1724,10 +1724,10 @@ case@1.6.3, case@^1.6.3:
   resolved "https://registry.yarnpkg.com/case/-/case-1.6.3.tgz#0a4386e3e9825351ca2e6216c60467ff5f1ea1c9"
   integrity sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==
 
-cdk-nag@^2.37.51:
-  version "2.37.51"
-  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.37.51.tgz#fd1d66620ba4f1a19cba091368e9e60868aac11f"
-  integrity sha512-oqlbHxxHQaSOg/9ME4f/S2uSHidBwPVTIfgGhaZPGM20HpGE+cv2YqTB5ID3qKL5/fcpSNDPF7nosU84W2N7nQ==
+cdk-nag@^2.37.52:
+  version "2.37.52"
+  resolved "https://registry.yarnpkg.com/cdk-nag/-/cdk-nag-2.37.52.tgz#ab9eb9d606608c2a32c831102cf9fbbf3df50705"
+  integrity sha512-Hf2hYU59zgc2TX3lyHnhkgzkDVdbQMkWbm6uNdVp9Jz+t2fQ0NEzoOJyB1F1JdsjoITrlWGuZHBmATVGC2jbxw==
 
 cdk-remote-stack@^2.1.0:
   version "2.1.0"
