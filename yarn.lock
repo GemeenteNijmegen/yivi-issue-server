@@ -525,7 +525,7 @@
   resolved "https://registry.yarnpkg.com/@gemeentenijmegen/aws-constructs/-/aws-constructs-0.0.47.tgz#f718c539d71ff567ee9dc38e0374968c27f80347"
   integrity sha512-/oedntMDPqqNQS3GawlnpWc6HXMJ77g5UjmU8N8wV5ybzPZ7wkCMbaoRmTMDITxCIBFu7n14yX7axVmK4Y0FPA==
 
-"@gemeentenijmegen/projen-project-type@^1.11.11":
+"@gemeentenijmegen/projen-project-type@^1.11.12":
   version "1.11.12"
   resolved "https://registry.yarnpkg.com/@gemeentenijmegen/projen-project-type/-/projen-project-type-1.11.12.tgz#fe2d1d6922f3b6f9a400f3444aedba89202e78c2"
   integrity sha512-xxaYmkoudrnHYQMB3YMfldNLqiuqjdo5iWYkpAoz1/wrCxqToOW8kA4KgCNdlkyw+5ivPLQR9N4PxqjTpIDWTw==
@@ -1462,9 +1462,9 @@ available-typed-arrays@^1.0.7:
     possible-typed-array-names "^1.0.0"
 
 aws-cdk-lib@^2.1.0:
-  version "2.234.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.234.0.tgz#85b16906757682da9d0e10fd7bc442ecd8c058fa"
-  integrity sha512-rMALG1b4wqN3fPMjdQ12HZxMN3vA2Er39uFymawMpsiAar+1bxNmFiSPPkW+LY7zQIj1Gha8ZpwAEBNqgTMLwA==
+  version "2.234.1"
+  resolved "https://registry.yarnpkg.com/aws-cdk-lib/-/aws-cdk-lib-2.234.1.tgz#d4cb658edf3d1027b69b1a13d2fe0abdcefd700d"
+  integrity sha512-2oNqAA1qjF9xHCom6yHuY8KE6UltK7pTg3egf/t1+C6/OFEaw9+jyhCWmTasGmvjyQSkbvKiCPZco0l+XVyxiQ==
   dependencies:
     "@aws-cdk/asset-awscli-v1" "2.2.258"
     "@aws-cdk/asset-node-proxy-agent-v6" "^2.1.0"
@@ -1557,9 +1557,9 @@ balanced-match@^1.0.0:
   integrity sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==
 
 baseline-browser-mapping@^2.9.0:
-  version "2.9.13"
-  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.9.13.tgz#e1d39147f6a7492438131476026e705d816b10cb"
-  integrity sha512-WhtvB2NG2wjr04+h77sg3klAIwrgOqnjS49GGudnUPGFFgg7G17y7Qecqp+2Dr5kUDxNRBca0SK7cG8JwzkWDQ==
+  version "2.9.14"
+  resolved "https://registry.yarnpkg.com/baseline-browser-mapping/-/baseline-browser-mapping-2.9.14.tgz#3b6af0bc032445bca04de58caa9a87cfe921cbb3"
+  integrity sha512-B0xUquLkiGLgHhpPBqvl7GWegWBUNuujQ6kXd/r1U38ElPT6Ok8KZ8e+FpUGEc2ZoRQUzq/aUnaKFc/svWUGSg==
 
 brace-expansion@^1.1.7:
   version "1.1.12"
