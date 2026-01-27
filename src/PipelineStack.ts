@@ -1,16 +1,19 @@
 import { PermissionsBoundaryAspect } from '@gemeentenijmegen/aws-constructs';
+import { getNodeVersion } from '@gemeentenijmegen/projen-project-type';
 import * as core from 'aws-cdk-lib';
 import {
   Aspects,
   aws_secretsmanager as secretsmanager,
 } from 'aws-cdk-lib';
+import { BuildSpec } from 'aws-cdk-lib/aws-codebuild';
+import { PipelineType } from 'aws-cdk-lib/aws-codepipeline';
 import * as cdkpipelines from 'aws-cdk-lib/pipelines';
 import { Construct } from 'constructs';
 import { ApiStage } from './ApiStage';
 import { Configurable } from './Configuration';
 import { Statics } from './Statics';
 
-export interface PipelineStackProps extends core.StackProps, Configurable {}
+export interface PipelineStackProps extends core.StackProps, Configurable { }
 
 export class PipelineStack extends core.Stack {
 
@@ -55,6 +58,18 @@ export class PipelineStack extends core.Stack {
       dockerCredentials: [
         cdkpipelines.DockerCredential.dockerHub(dockerHubSecret),
       ],
+      pipelineType: PipelineType.V1,
+      synthCodeBuildDefaults: {
+        partialBuildSpec: BuildSpec.fromObject({
+          phases: {
+            install: {
+              'runtime-versions': {
+                nodejs: getNodeVersion(),
+              },
+            },
+          },
+        }),
+      },
     });
     return pipeline;
   }
