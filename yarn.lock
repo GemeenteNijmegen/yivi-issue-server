@@ -525,10 +525,10 @@
   resolved "https://registry.yarnpkg.com/@gemeentenijmegen/aws-constructs/-/aws-constructs-0.0.47.tgz#f718c539d71ff567ee9dc38e0374968c27f80347"
   integrity sha512-/oedntMDPqqNQS3GawlnpWc6HXMJ77g5UjmU8N8wV5ybzPZ7wkCMbaoRmTMDITxCIBFu7n14yX7axVmK4Y0FPA==
 
-"@gemeentenijmegen/projen-project-type@^1.12.0":
-  version "1.12.0"
-  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/projen-project-type/-/projen-project-type-1.12.0.tgz#61b4c8b8d4c9b638c5a69322f7763f54a214a2b4"
-  integrity sha512-dLGFm/BSKWQI9hF/EkZptP6vZzlSrW9lRPLxFINEaB2vwGmLLjmykUwKHfguaS7q57or9ewLmpBC6jdD9p7DhQ==
+"@gemeentenijmegen/projen-project-type@^1.12.1":
+  version "1.12.1"
+  resolved "https://registry.yarnpkg.com/@gemeentenijmegen/projen-project-type/-/projen-project-type-1.12.1.tgz#07991a46a14a60d608d636497975572c188f2709"
+  integrity sha512-9YxvCK5XbCKpXDtSo3NU3MdpZTh6G1MLjnbgx/2DlxpG5KfdNalXrRonW8zVO/ZqoE8r/JAYvdJM564djVG1Kg==
 
 "@humanfs/core@^0.19.1":
   version "0.19.1"
@@ -2161,9 +2161,9 @@ dunder-proto@^1.0.0, dunder-proto@^1.0.1:
     gopd "^1.2.0"
 
 electron-to-chromium@^1.5.263:
-  version "1.5.279"
-  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.279.tgz#67dfdeb22fd81412d0d18d1d9b2c749e9b8945cb"
-  integrity sha512-0bblUU5UNdOt5G7XqGiJtpZMONma6WAfq9vsFmtn9x1+joAObr6x1chfqyxFSDCAFwFhCQDrqeAr6MYdpwJ9Hg==
+  version "1.5.282"
+  resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.282.tgz#6695816e5b170210d6aa07561546ed7d97347630"
+  integrity sha512-FCPkJtpst28UmFzd903iU7PdeVTfY0KAeJy+Lk0GLZRwgwYHn/irRcaCbQQOmr5Vytc/7rcavsYLvTM8RiHYhQ==
 
 emittery@^0.13.1:
   version "0.13.1"
