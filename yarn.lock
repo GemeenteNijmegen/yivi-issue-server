@@ -13,9 +13,9 @@
   integrity sha512-7bY3J8GCVxLupn/kNmpPc5VJz8grx+4RKfnnJiO1LG+uxkZfANZG3RMHhE+qQxxwkyQ9/MfPtTpf748UhR425A==
 
 "@aws-cdk/cloud-assembly-api@^2.0.0":
-  version "2.0.1"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/cloud-assembly-api/-/cloud-assembly-api-2.0.1.tgz#3ab4f39297fcf72cf45fa4a0ad1f418a7c93b688"
-  integrity sha512-6CLsOvGoAmwryhhaE7YvbH4CYSvV9IjySj/4aBR0Vs5abjyi6j2oM+2uKvhePogKtuNO5Ps6OsT/3rwAoJKGdg==
+  version "2.1.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/cloud-assembly-api/-/cloud-assembly-api-2.1.0.tgz#c05e31cbf9f0a2bfd118471599e8eaf998ea4458"
+  integrity sha512-fKNGg0aDAKKKwJJtuauvYYAcNwKZlZ18/Ow2Uq9CKIScfiZuvZFDZpMdYmEvvoD7FViYr/XP4K3yL3fYVZODRw==
   dependencies:
     jsonschema "~1.4.1"
     semver "^7.7.3"
@@ -1491,9 +1491,9 @@ aws-cdk-lib@^2.1.0:
     yaml "1.10.2"
 
 aws-cdk@^2:
-  version "2.1105.0"
-  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.1105.0.tgz#937cb2072b9bfd6544fd3a3be99cd0697f018852"
-  integrity sha512-1RY2UZJv31XYobEGFHQEb7c2HXNzDbHuHqdnfdYyygvZW4Nrm8MJCW42lqItQCn+wF52Ixc7r2VR5eR4YGtVhA==
+  version "2.1106.0"
+  resolved "https://registry.yarnpkg.com/aws-cdk/-/aws-cdk-2.1106.0.tgz#3a724a54d8d32f01ce98e503debeda043353c1d8"
+  integrity sha512-1tyQNnuCnH3nc0QpOL84UNhr+y73fyS75nwSnuy5z7XtRwdsOuqyqcDxd6tvCXkUBA7fdgu8p1FR3hkqrW0GWA==
 
 babel-jest@^29.7.0:
   version "29.7.0"
