@@ -48,7 +48,7 @@
   },
   "dependencies": {
     "@gemeentenijmegen/aws-constructs": "^0.0.48",
-    "@gemeentenijmegen/projen-project-type": "^1.12.1",
+    "@gemeentenijmegen/projen-project-type": "^1.12.2",
     "aws-cdk-lib": "^2.1.0",
     "cdk-nag": "^2.37.55",
     "cdk-remote-stack": "^2.1.0",
