@@ -70,6 +70,13 @@ export interface Configuration {
    */
   criticality: Criticality;
 
+  /**
+   * The SD-JWT VC issuer identifier as defined in the scheme.
+   * Used as the filename for the certificate and private key PEM files.
+   * E.g. 'irma-demo.gemeente' for acceptance, 'pbdf.gemeente' for production.
+   */
+  sdjwtvcIssuerId: string;
+
 }
 
 export const configurations: { [key: string]: Configuration } = {
@@ -87,6 +94,7 @@ export const configurations: { [key: string]: Configuration } = {
     sessionEndpointIamUser: false,
     useSpotInstances: true,
     criticality: new Criticality('medium'),
+    sdjwtvcIssuerId: 'irma-demo.gemeente',
   },
   main: {
     branchName: 'main',
@@ -101,6 +109,7 @@ export const configurations: { [key: string]: Configuration } = {
     ],
     sessionEndpointIamUser: false,
     criticality: new Criticality('high'),
+    sdjwtvcIssuerId: 'pbdf.gemeente',
   },
 };
 
