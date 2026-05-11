@@ -28,6 +28,7 @@ test('ApiStage cdk-nag', () => {
       yiviVersionNumber: 'v0.1.2',
       alpineLinuxVersion: 'v0.1.2',
       criticality: new Criticality('high'),
+      sdjwtvcIssuerId: 'irma-demo.gemeente',
     },
   });
 
