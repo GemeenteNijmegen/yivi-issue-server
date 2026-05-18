@@ -301,8 +301,11 @@ export class ContainerClusterStack extends Stack {
     // Get secrets
     const apiKey = Secret.fromSecretNameV2(this, 'api-key', Statics.secretsApiKey);
     const privateKey = Secret.fromSecretNameV2(this, 'private-key', Statics.secretsPrivateKey);
-    const sdJwtVcCert = Secret.fromSecretNameV2(this, 'sdjwtvc-cert', Statics.secretsSdJwtVcCert);
-    const sdJwtVcPrivateKey = Secret.fromSecretNameV2(this, 'sdjwtvc-private-key', Statics.secretsSdJwtVcPrivateKey);
+
+    // SD-JWT VC secrets (only when sdjwtvcIssuerId is configured)
+    const enableSdJwtVc = !!props.configuration.sdjwtvcIssuerId;
+    const sdJwtVcCert = enableSdJwtVc ? Secret.fromSecretNameV2(this, 'sdjwtvc-cert', Statics.secretsSdJwtVcCert) : undefined;
+    const sdJwtVcPrivateKey = enableSdJwtVc ? Secret.fromSecretNameV2(this, 'sdjwtvc-private-key', Statics.secretsSdJwtVcPrivateKey) : undefined;
 
     // Define a security group to allow ingress on the container port
     const containerPort = 8080;
@@ -330,13 +333,13 @@ export class ContainerClusterStack extends Stack {
       secrets: {
         IRMA_TOKEN: ecs.Secret.fromSecretsManager(apiKey),
         IRMA_GEMEENTE_PRIVKEY: ecs.Secret.fromSecretsManager(privateKey),
-        SDJWTVC_CERT: ecs.Secret.fromSecretsManager(sdJwtVcCert),
-        SDJWTVC_PRIVATE_KEY: ecs.Secret.fromSecretsManager(sdJwtVcPrivateKey),
+        ...(sdJwtVcCert && { SDJWTVC_CERT: ecs.Secret.fromSecretsManager(sdJwtVcCert) }),
+        ...(sdJwtVcPrivateKey && { SDJWTVC_PRIVATE_KEY: ecs.Secret.fromSecretsManager(sdJwtVcPrivateKey) }),
       },
       criticality: props.configuration.criticality,
       environment: {
         IRMA_GW_URL: this.hostedzone.zoneName, // protocol prefix is added in the container
-        SDJWTVC_ISSUER_ID: props.configuration.sdjwtvcIssuerId,
+        ...(props.configuration.sdjwtvcIssuerId && { SDJWTVC_ISSUER_ID: props.configuration.sdjwtvcIssuerId }),
       },
     });
 
@@ -349,8 +352,8 @@ export class ContainerClusterStack extends Stack {
     service.allowToDecryptUsingKey(protectionKeyArn);
     privateKey.grantRead(role);
     apiKey.grantRead(role);
-    sdJwtVcCert.grantRead(role);
-    sdJwtVcPrivateKey.grantRead(role);
+    if (sdJwtVcCert) { sdJwtVcCert.grantRead(role); }
+    if (sdJwtVcPrivateKey) { sdJwtVcPrivateKey.grantRead(role); }
     asset.repository.grantPull(role);
 
   }

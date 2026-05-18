@@ -74,8 +74,9 @@ export interface Configuration {
    * The SD-JWT VC issuer identifier as defined in the scheme.
    * Used as the filename for the certificate and private key PEM files.
    * E.g. 'irma-demo.gemeente' for acceptance, 'pbdf.gemeente' for production.
+   * When not set, SD-JWT VC issuance is disabled.
    */
-  sdjwtvcIssuerId: string;
+  sdjwtvcIssuerId?: string;
 
 }
 
@@ -109,7 +110,6 @@ export const configurations: { [key: string]: Configuration } = {
     ],
     sessionEndpointIamUser: false,
     criticality: new Criticality('high'),
-    sdjwtvcIssuerId: 'pbdf.gemeente',
   },
 };
 
