@@ -100,7 +100,7 @@ export const configurations: { [key: string]: Configuration } = {
     branchName: 'main',
     yiviVersionNumber: 'v0.19.2',
     yiviVersionChecksum: '2613009da798e249b4d07d9435cde330aa63d4ba9e05cbe3fe54cc346783c6f6',
-    alpineLinuxVersion: '3.21.3',
+    alpineLinuxVersion: '3.21.7',
     codeStarConnectionArn: Statics.codeStarConnectionArn,
     deployFromEnvironment: Statics.deploymentEnvironment,
     deployToEnvironment: Statics.productionEnvironment,
