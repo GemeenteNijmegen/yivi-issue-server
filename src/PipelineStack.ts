@@ -51,8 +51,8 @@ export class PipelineStack extends core.Stack {
           BRANCH_NAME: branchName,
         },
         commands: [
-          'yarn install --frozen-lockfile',
-          'yarn build',
+          'npm ci',
+          'npm run build',
         ],
       }),
       dockerCredentials: [

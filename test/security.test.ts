@@ -22,6 +22,7 @@ const testConfiguration: Configuration = {
   yiviVersionNumber: 'v0.1.13.0',
   alpineLinuxVersion: 'v0.1.13.0',
   criticality: new Criticality('high'),
+  sdjwtvcIssuerId: 'irma-demo.gemeente',
 };
 
 

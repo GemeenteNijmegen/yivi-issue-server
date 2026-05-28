@@ -30,11 +30,25 @@ export class SecretsStack extends Stack {
       encryptionKey: key,
     });
 
+    const sdJwtVcCert = new secrets.Secret(this, 'sdjwtvc-cert', {
+      secretName: Statics.secretsSdJwtVcCert,
+      description: 'SD-JWT VC issuer certificate (PEM) for YIVI issue server',
+      encryptionKey: key,
+    });
+
+    const sdJwtVcPrivateKey = new secrets.Secret(this, 'sdjwtvc-private-key', {
+      secretName: Statics.secretsSdJwtVcPrivateKey,
+      description: 'SD-JWT VC issuer private key (PEM) for YIVI issue server',
+      encryptionKey: key,
+    });
+
     // Deny access to secret for all requests except yivi-adminsitrator
     this.allowManagementOfSecret(apiKey);
     this.allowManagementOfSecret(privateKey);
+    this.allowManagementOfSecret(sdJwtVcCert);
+    this.allowManagementOfSecret(sdJwtVcPrivateKey);
 
-    this.createAdminPolicy(key.keyArn, privateKey.secretArn, apiKey.secretArn);
+    this.createAdminPolicy(key.keyArn, privateKey.secretArn, apiKey.secretArn, sdJwtVcCert.secretArn, sdJwtVcPrivateKey.secretArn);
   }
 
   allowManagementOfSecret(secret: secrets.Secret) {
