@@ -29,5 +29,9 @@
       "key": "IRMA_TOKEN"
     }
   },
-  "max_request_age": 300
+  "max_request_age": 300,
+  "sdjwtvc": {
+    "issuer_certificates_dir": "/storage/irma/sdjwtvc/certs",
+    "issuer_private_keys_dir": "/storage/irma/sdjwtvc/privkeys"
+  }
 }

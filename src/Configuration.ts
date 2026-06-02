@@ -110,6 +110,7 @@ export const configurations: { [key: string]: Configuration } = {
     ],
     sessionEndpointIamUser: false,
     criticality: new Criticality('high'),
+    sdjwtvcIssuerId: 'pbdf.gemeente',
   },
 };
 
