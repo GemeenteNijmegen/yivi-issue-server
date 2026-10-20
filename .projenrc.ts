@@ -1,8 +1,9 @@
-const { GemeenteNijmegenCdkApp } = require('@gemeentenijmegen/projen-project-type');
-const { GithubCredentials } = require('projen/lib/github');
+import { GemeenteNijmegenCdkApp } from '@gemeentenijmegen/projen-project-type';
+import { GithubCredentials } from 'projen/lib/github';
 const project = new GemeenteNijmegenCdkApp({
   cdkVersion: '2.1.0',
   defaultReleaseBranch: 'main',
+  projenrcTs: true,
   name: 'yivi-issue-server',
   deps: [
     '@gemeentenijmegen/projen-project-type',
