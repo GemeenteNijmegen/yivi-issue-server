@@ -42,14 +42,14 @@
     "eslint-plugin-import": "^2.32.0",
     "jest": "^29.7.0",
     "jest-junit": "^17",
-    "projen": "^0.104.14",
+    "projen": "^0.104.17",
     "ts-jest": "^29.4.15",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
   },
   "dependencies": {
-    "@gemeentenijmegen/aws-constructs": "^0.0.55",
-    "@gemeentenijmegen/projen-project-type": "^1.16.2",
+    "@gemeentenijmegen/aws-constructs": "^0.0.56",
+    "@gemeentenijmegen/projen-project-type": "^1.16.3",
     "aws-cdk-lib": "^2.1.0",
     "cdk-nag": "^2.38.2",
     "cdk-remote-stack": "^2.1.0",
