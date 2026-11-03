@@ -25,4 +25,4 @@ if [ -n "$SDJWTVC_PRIVATE_KEY" ]; then
 fi
 
 echo "Starting irma server with custom config file"
-irma server --config /storage/irma/irma_config.json
+irma irma server --config /storage/irma/irma_config.json
