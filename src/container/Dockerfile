@@ -6,7 +6,7 @@ FROM alpine:${ALPINE_VERSION} as getter
 ARG IRMA_VERSION
 ARG IRMA_CHECKSUM
 
-RUN wget -q -O /irma https://github.com/privacybydesign/irmago/releases/download/${IRMA_VERSION}/irma-linux-amd64 && \
+RUN wget -q -O /irma https://github.com/privacybydesign/irmago/releases/download/${IRMA_VERSION}/yivi-linux-amd64 && \
     echo "${IRMA_CHECKSUM}  /irma" | sha256sum -c && \
     chmod 0755 /irma && \
     /irma version

@@ -21,8 +21,8 @@ export interface Configuration {
 
   /**
    * Checksum of the IRMA GO executable
-   * You can obtain the checksum by downloading the irma-linux-amd64 binary release and calculating it locally
-   * You can create the checksum by executing `shasum -a 256 ~/Downloads/irma-linux-amd64` (on mac)
+   * You can obtain the checksum by downloading the yivi-linux-amd64 binary release and calculating it locally
+   * You can create the checksum by executing `shasum -a 256 ~/Downloads/yivi-linux-amd64` (on mac)
    */
   yiviVersionChecksum: string;
 
